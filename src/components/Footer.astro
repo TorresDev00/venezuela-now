@@ -1,0 +1,96 @@
+---
+const navLinks = [
+  { href: "#situacion",    label: "Nuestro trabajo" },
+  { href: "#involucrarse", label: "Involucrarse" },
+  { href: "#historias",    label: "Noticias" },
+  { href: "/donar",        label: "Donar" },
+];
+
+const legalLinks = [
+  { href: "/privacidad", label: "Política de privacidad" },
+  { href: "/terminos",   label: "Términos de uso" },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer id="acerca" class="bg-brand-navy text-white pt-16 pb-10" aria-labelledby="footer-heading">
+  <h2 id="footer-heading" class="sr-only">Pie de página</h2>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
+
+      <!-- Marca y misión -->
+      <div class="lg:col-span-2">
+        <a href="/" aria-label="Venezuela NOW – Inicio">
+          <img
+            src="/logo.png"
+            alt="Venezuela NOW"
+            class="h-12 w-auto mb-5"
+            loading="lazy"
+          />
+        </a>
+        <p class="text-white/65 text-sm leading-relaxed max-w-xs">
+          Venezuela NOW, Inc. es una organización sin fines de lucro 501(c)(3)
+          dedicada a apoyar a los sobrevivientes de los desastres naturales
+          en Venezuela.
+        </p>
+      </div>
+
+      <!-- Navegación -->
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-widest text-white/35 mb-5">Navegación</h3>
+        <ul class="space-y-3">
+          {navLinks.map(link => (
+            <li>
+              <a
+                href={link.href}
+                class="text-white/65 hover:text-white text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Legal -->
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-widest text-white/35 mb-5">Legal</h3>
+        <ul class="space-y-3">
+          {legalLinks.map(link => (
+            <li>
+              <a
+                href={link.href}
+                class="text-white/65 hover:text-white text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div class="mt-6">
+          <a
+            href="/donar"
+            class="inline-flex items-center justify-center rounded-full bg-brand-gold text-brand-navy font-bold text-sm px-5 py-2.5 hover:brightness-105 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+          >
+            Donar ahora
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra inferior -->
+    <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+      <div class="text-white/35 text-xs space-y-1">
+        <!-- TODO: Reemplaza TODO-EIN-XXXXXXXXX con el EIN real de Venezuela NOW, Inc. -->
+        <p>Venezuela NOW, Inc. · Organización 501(c)(3) · EIN: TODO-EIN-XXXXXXXXX</p>
+        <p>© {year} Venezuela NOW, Inc. Todos los derechos reservados.</p>
+      </div>
+      <p class="text-white/35 text-xs max-w-xs text-left sm:text-right leading-relaxed">
+        Pagos procesados de forma segura por Stripe.<br />
+        No almacenamos datos de tarjeta.
+      </p>
+    </div>
+  </div>
+</footer>

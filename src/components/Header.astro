@@ -1,0 +1,100 @@
+---
+// No props
+---
+
+<header id="site-header" class="fixed top-0 left-0 right-0 z-50" data-scrolled="false">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Logo -->
+      <a href="/" aria-label="Venezuela NOW – Inicio" class="flex-shrink-0">
+        <img
+          src="/logo.png"
+          alt="Venezuela NOW"
+          class="h-10 w-auto drop-shadow-sm"
+          width="160" height="40"
+          loading="eager"
+        />
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden md:flex items-center gap-8" aria-label="Navegación principal">
+        <a href="#situacion"   class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">Nuestro trabajo</a>
+        <a href="#involucrarse" class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">Involucrarse</a>
+        <a href="#acerca"      class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">Acerca de</a>
+      </nav>
+
+      <!-- Right controls -->
+      <div class="flex items-center gap-3">
+        <span class="hidden md:inline-flex items-center border rounded-full px-3 py-1 text-xs font-bold tracking-wide header-lang">
+          ES
+        </span>
+        <a
+          href="/donar"
+          class="inline-flex items-center justify-center rounded-full bg-brand-gold text-brand-navy text-sm font-bold px-5 py-2 hover:brightness-105 active:scale-95 transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+        >
+          Donar
+        </a>
+        <!-- Hamburger (mobile) -->
+        <button
+          id="menu-btn"
+          type="button"
+          class="md:hidden flex flex-col justify-center items-center gap-1.5 w-10 h-10 rounded-lg"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+          aria-label="Abrir menú de navegación"
+        >
+          <span class="ham-bar"></span>
+          <span class="ham-bar"></span>
+          <span class="ham-bar"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="md:hidden hidden" aria-hidden="true">
+    <div class="bg-brand-navy/97 backdrop-blur-xl px-6 pb-6 pt-2 border-t border-white/10">
+      <nav class="flex flex-col" aria-label="Menú móvil">
+        <a href="#situacion"   class="py-4 text-white/90 font-medium text-base border-b border-white/10 hover:text-white transition-colors">Nuestro trabajo</a>
+        <a href="#involucrarse" class="py-4 text-white/90 font-medium text-base border-b border-white/10 hover:text-white transition-colors">Involucrarse</a>
+        <a href="#acerca"      class="py-4 text-white/90 font-medium text-base hover:text-white transition-colors">Acerca de</a>
+        <a
+          href="/donar"
+          class="mt-5 inline-flex items-center justify-center rounded-full bg-brand-gold text-brand-navy font-bold text-base px-6 py-3.5 hover:brightness-105 transition-all"
+        >
+          Donar ahora
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<script>
+  const header    = document.getElementById('site-header')!;
+  const menuBtn   = document.getElementById('menu-btn')!;
+  const mobileMenu = document.getElementById('mobile-menu')!;
+
+  function onScroll() {
+    header.dataset.scrolled = String(window.scrollY > 40);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  let isOpen = false;
+  menuBtn.addEventListener('click', () => {
+    isOpen = !isOpen;
+    mobileMenu.classList.toggle('hidden', !isOpen);
+    mobileMenu.setAttribute('aria-hidden', String(!isOpen));
+    menuBtn.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  mobileMenu.querySelectorAll('a').forEach(link =>
+    link.addEventListener('click', () => {
+      isOpen = false;
+      mobileMenu.classList.add('hidden');
+      mobileMenu.setAttribute('aria-hidden', 'true');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    })
+  );
+</script>

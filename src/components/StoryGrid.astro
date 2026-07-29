@@ -1,0 +1,127 @@
+---
+import { Image } from "astro:assets";
+import HeroImage from "../assets/img/DSC01246.webp";
+import StoryImage1 from "../assets/img/DSC01994.webp";
+import StoryImage2 from "../assets/img/DSC01584.webp";
+
+const featured = {
+  tag: "Crisis humanitaria",
+  title: "El terremoto de 2024: Un país en busca de ayuda",
+  excerpt:
+    "Más de 100,000 personas perdieron sus hogares en los sismos que sacudieron el oeste de Venezuela. Aquí la historia de quienes sobrevivieron.",
+  date: "28 de julio, 2026",
+  href: "/noticias/terremoto-2024",
+  image: HeroImage,
+  alt: "Edificios afectados por el terremoto en Venezuela",
+};
+
+const stories = [
+  {
+    tag: "Testimonio",
+    title: "«Gracias a Venezuela NOW tengo dónde dormir esta noche»",
+    date: "21 de julio, 2026",
+    href: "/noticias/testimonio-refugio",
+    image: StoryImage1,
+    alt: "Familia venezolana recibiendo ayuda humanitaria",
+  },
+  {
+    tag: "Actualización",
+    title: "Primer convoy de ayuda llega a las zonas más afectadas",
+    date: "15 de julio, 2026",
+    href: "/noticias/primer-convoy",
+    image: StoryImage2,
+    alt: "Convoy de ayuda humanitaria llegando a zona afectada",
+  },
+];
+---
+
+<section id="historias" class="py-24 bg-white" aria-labelledby="historias-heading">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <div class="flex items-end justify-between mb-12 reveal">
+      <div>
+        <h2 id="historias-heading" class="text-3xl sm:text-4xl font-extrabold text-brand-navy mb-2">
+          Historias y noticias
+        </h2>
+        <p class="text-slate-600">Lo que está pasando en el terreno.</p>
+      </div>
+      <a
+        href="/noticias"
+        class="hidden sm:inline-flex text-sm font-semibold text-brand-cobalt hover:text-brand-navy transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+      >
+        Ver todas →
+      </a>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+
+      <!-- Tarjeta destacada -->
+      <article class="lg:col-span-2 relative overflow-hidden rounded-3xl reveal min-h-96 sm:min-h-96 flex flex-col pt-24" aria-labelledby="featured-heading">
+        <Image
+          src={featured.image}
+          alt={featured.alt}
+          class="absolute inset-0 w-full h-full object-cover"
+          loading="eager"
+          widths={[480, 768, 1200]}
+          sizes="(min-width: 1024px) 66vw, 100vw"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" aria-hidden="true"></div>
+
+        <div class="relative mt-auto p-8 sm:p-10">
+          <span class="inline-block bg-brand-crimson text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
+            {featured.tag}
+          </span>
+          <h3 id="featured-heading" class="text-2xl sm:text-3xl font-extrabold text-white mb-3 leading-tight">
+            {featured.title}
+          </h3>
+          <p class="text-white/75 mb-5 leading-relaxed">{featured.excerpt}</p>
+          <div class="flex items-center justify-between">
+            <time class="text-white/45 text-sm">{featured.date}</time>
+            <a
+              href={featured.href}
+              class="text-brand-gold text-sm font-bold hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+            >
+              Leer más →
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Tarjetas secundarias -->
+      <div class="flex flex-col gap-6">
+        {stories.map((story, i) => (
+          <article
+            class="relative overflow-hidden rounded-3xl flex flex-col flex-1 reveal min-h-44"
+            style={`transition-delay: ${(i + 1) * 0.1}s`}
+            aria-labelledby={`story-heading-${i}`}
+          >
+            <Image
+              src={story.image}
+              alt={story.alt}
+              class="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+              widths={[320, 480, 640]}
+              sizes="(min-width: 1024px) 33vw, 100vw"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" aria-hidden="true"></div>
+
+            <a
+              href={story.href}
+              class="relative mt-auto p-6 flex flex-col focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+              aria-labelledby={`story-heading-${i}`}
+            >
+              <span class="inline-block bg-white/20 text-white text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-2 w-fit">
+                {story.tag}
+              </span>
+              <h3 id={`story-heading-${i}`} class="text-base font-bold text-white leading-snug mb-2">
+                {story.title}
+              </h3>
+              <time class="text-white/45 text-xs">{story.date}</time>
+            </a>
+          </article>
+        ))}
+      </div>
+
+    </div>
+  </div>
+</section>

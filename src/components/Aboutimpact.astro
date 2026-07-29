@@ -1,0 +1,175 @@
+---
+import { Image } from "astro:assets";
+import VideoPoster from "../assets/img/DSC01246.webp";
+import BadgeEcfa from "../../public/logo.png";
+import BadgeForbes from "../../public/logo.png";
+import BadgeTransparent from "../../public/logo.png";
+
+// TODO: reemplaza estos valores por datos reales / Content Collection
+const stats = [
+  { icon: "globe", value: "12", suffix: "K+", label: "Personas ayudadas" },
+  { icon: "hands", value: "480", suffix: "+", label: "Voluntarios movilizados" },
+  { icon: "box", value: "3.2", suffix: "M+", label: "En ayuda entregada", prefix: "$" },
+  { icon: "meal", value: "45", suffix: "K+", label: "Comidas servidas" },
+];
+
+const badges = [
+  { src: BadgeForbes, alt: "Forbes America's Top Charities 2025–2026" },
+  { src: BadgeEcfa, alt: "ECFA Accredited" },
+  { src: BadgeTransparent, alt: "Excellence in Giving — Certified Transparent" },
+];
+
+const icons: Record<string, string> = {
+  globe:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 6 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-6-3.8-9s1.3-6.3 3.8-9Z"/></svg>',
+  hands:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.4-9.5-9C.8 8.7 2 5 5.5 5 8 5 9.5 6.8 12 9.5 14.5 6.8 16 5 18.5 5 22 5 23.2 8.7 21.5 12 19 16.6 12 21 12 21Z"/></svg>',
+  box:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9 12 4l9 5-9 5-9-5Z"/><path d="M3 9v7l9 5 9-5V9M12 14v7"/></svg>',
+  meal:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 3v7a2 2 0 0 0 4 0V3M7 3v18M11 3v4M15 3c-1.1 1.4-1.5 3-1.5 5s1.5 4 1.5 7v3"/></svg>',
+};
+---
+
+<section
+  id="quienes-somos"
+  class="relative overflow-hidden bg-brand-cobalt py-24"
+  aria-labelledby="about-heading"
+>
+  <!-- glow decorativo sutil -->
+  <div
+    class="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-brand-gold/20 blur-3xl"
+    aria-hidden="true"
+  ></div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+
+    <!-- Columna izquierda: texto -->
+    <div class="reveal">
+      <span class="block text-xs font-bold tracking-[0.2em] uppercase text-white/60 mb-4">
+        Quiénes somos
+      </span>
+
+      <h2 id="about-heading" class="text-4xl sm:text-5xl font-extrabold text-white leading-[1.05] mb-6">
+        Una pasión
+        <span class="relative inline-block font-serif italic font-semibold text-white">
+           firme 
+          <span
+            class="absolute left-0 -bottom-1 h-1 w-full bg-brand-gold rounded-full"
+            aria-hidden="true"
+          ></span>
+        </span>
+        por reconstruir Venezuela.
+      </h2>
+
+      <!-- Badges de confianza -->
+      <div class="flex flex-wrap items-center gap-4 mb-8">
+        {badges.map((badge) => (
+          <div class="glass rounded-2xl p-2.5">
+            <Image src={badge.src} alt={badge.alt} class="h-12 w-auto" loading="lazy" />
+          </div>
+        ))}
+      </div>
+
+      <p class="text-white/80 leading-relaxed mb-6 max-w-md">
+        Ya sea llevando refugio, agua potable, alimentos o atención médica,
+        el objetivo de Venezuela NOW es acercar ayuda real a quienes más la
+        necesitan tras los terremotos. Trabajamos con una red de voluntarios
+        y socios locales para que cada donación llegue a su destino.
+      </p>
+
+      <a
+        href="/nosotros"
+        class="inline-flex items-center gap-2 text-sm font-bold text-white border-b-2 border-brand-gold pb-0.5 hover:text-brand-gold transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-gold"
+      >
+        Conoce más sobre nosotros
+      </a>
+    </div>
+
+    <!-- Columna derecha: video + stats -->
+    <div class="reveal" style="transition-delay: 0.1s">
+
+      <!-- Video con thumbnail y botón play -->
+      <div
+        id="about-video"
+        class="glass relative overflow-hidden rounded-3xl aspect-video mb-10"
+        data-youtube-id="TODO_VIDEO_ID"
+      >
+        <Image
+          src={VideoPoster}
+          alt="Voluntarios de Venezuela NOW en labores de ayuda"
+          class="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+          widths={[480, 768, 1024]}
+          sizes="(min-width: 1024px) 50vw, 100vw"
+        />
+        <div class="absolute inset-0 bg-black/10" aria-hidden="true"></div>
+
+        <button
+          type="button"
+          id="about-video-play"
+          aria-label="Reproducir video: nuestra labor en Venezuela"
+          class="absolute inset-0 flex items-center justify-center group focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-gold"
+        >
+          <span
+            class="flex items-center justify-center h-20 w-20 rounded-full bg-white/90 border-4 border-brand-gold shadow-xl transition-transform duration-300 group-hover:scale-105"
+          >
+            <svg viewBox="0 0 24 24" class="h-8 w-8 text-brand-cobalt ml-1" fill="currentColor">
+              <path d="M8 5v14l11-7-11-7Z" />
+            </svg>
+          </span>
+        </button>
+      </div>
+
+      <!-- Estadísticas -->
+      <p class="font-serif italic text-2xl text-white/90 mb-6">Desde 2026:</p>
+
+      <dl class="grid grid-cols-2 gap-x-8 gap-y-8">
+        {stats.map((stat, i) => (
+          <div class="flex items-start gap-3 reveal" style={`transition-delay: ${0.15 + i * 0.05}s`}>
+            <span
+              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10 text-white [&_svg]:h-5 [&_svg]:w-5"
+              aria-hidden="true"
+              set:html={icons[stat.icon]}
+            />
+            <div>
+              <dt class="sr-only">{stat.label}</dt>
+              <dd class="flex items-baseline gap-0.5">
+                <span class="text-3xl font-extrabold text-white">
+                  {stat.prefix}{stat.value}
+                </span>
+                <span class="text-xl font-serif italic text-white/90">{stat.suffix}</span>
+              </dd>
+              <p class="text-sm font-semibold text-white/70 border-b-2 border-white/20 inline-block pb-0.5 mt-0.5">
+                {stat.label}
+              </p>
+            </div>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Carga el iframe de YouTube solo al hacer clic (no bloquea LCP, sin JS pesado por defecto)
+  const wrapper = document.getElementById("about-video");
+  const playBtn = document.getElementById("about-video-play");
+
+  playBtn?.addEventListener("click", () => {
+    if (!wrapper) return;
+    const videoId = wrapper.dataset.youtubeId;
+    if (!videoId || videoId.startsWith("TODO")) {
+      console.warn("Falta configurar data-youtube-id en AboutImpact.astro");
+      return;
+    }
+    const iframe = document.createElement("iframe");
+    iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+    iframe.title = "Video: nuestra labor en Venezuela";
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture";
+    iframe.allowFullscreen = true;
+    iframe.className = "absolute inset-0 h-full w-full";
+    wrapper.innerHTML = "";
+    wrapper.appendChild(iframe);
+  });
+</script>

@@ -1,0 +1,41 @@
+---
+import HeroImage from "../assets/img/DSC01965.webp";
+---
+
+<section class="relative overflow-hidden py-24" aria-labelledby="cta-band-heading">
+
+  <!--
+    TODO: Reemplaza este div por la foto de fondo:
+    <img src="/images/cta-fondo.jpg" alt="" role="presentation" class="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+    Ruta sugerida: /public/images/cta-fondo.jpg (1920×1080, JPG < 350 KB)
+  -->
+  <img src={HeroImage.src} alt="" role="presentation" class="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" aria-hidden="true"></div>
+
+  <!-- Panel glass centrado -->
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+    <div class="glass rounded-3xl p-10 sm:p-14 max-w-xl w-full text-center reveal">
+
+      <p class="text-brand-crimson font-bold text-xs uppercase tracking-widest mb-3">
+        Actúa ahora
+      </p>
+      <h2 id="cta-band-heading" class="text-4xl sm:text-5xl font-extrabold text-brand-navy mb-4 leading-tight">
+        Dona hoy
+      </h2>
+      <p class="text-slate-600 text-lg leading-relaxed mb-8">
+        Cada dólar llega directamente a los sobrevivientes. No esperemos más — ellos necesitan ayuda ahora.
+      </p>
+
+      <a
+        href="/donar"
+        class="inline-flex items-center justify-center rounded-full bg-brand-gold text-brand-navy font-extrabold text-lg px-10 py-4 hover:brightness-105 active:scale-95 transition-all duration-150 shadow-xl shadow-brand-gold/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+      >
+        Donar ahora
+      </a>
+
+      <p class="mt-6 text-sm text-slate-500">
+        Tu donación es deducible de impuestos · Pago seguro procesado por Stripe
+      </p>
+    </div>
+  </div>
+</section>

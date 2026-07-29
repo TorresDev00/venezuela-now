@@ -1,0 +1,27 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Venezuela NOW",
+  description = "Venezuela NOW, Inc. es una organización sin fines de lucro 501(c)(3) dedicada a apoyar a los sobrevivientes de los terremotos en Venezuela.",
+} = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/logo.png" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0A2540" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
