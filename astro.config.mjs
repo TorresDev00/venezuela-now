@@ -16,6 +16,9 @@ export default defineConfig({
 		},
 	},
 	integrations: [sitemap()],
+	prefetch: {
+		prefetchAll: true,
+	},
 	vite: {
 		plugins: [tailwindcss()],
 	},

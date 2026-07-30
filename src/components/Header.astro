@@ -14,19 +14,19 @@ const translatePath = useTranslatedPath(lang);
       <!-- Logo -->
       <a href={translatePath("home")} aria-label={t("nav.homeAria")} class="flex-shrink-0">
         <img
-          src="/logo.png"
+          src="/logo.webp"
           alt="Venezuela NOW"
-          class="h-10 w-auto drop-shadow-sm"
-          width="160" height="40"
+          class="h-16 w-auto drop-shadow-sm"
+          width="420" height="120"
           loading="eager"
         />
       </a>
 
       <!-- Desktop nav -->
       <nav class="hidden md:flex items-center gap-8" aria-label={t("nav.ourWork")}>
-        <a href="#situacion"   class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">{t("nav.ourWork")}</a>
-        <a href="#involucrarse" class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">{t("nav.getInvolved")}</a>
-        <a href="#acerca"      class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">{t("nav.about")}</a>
+        <a href="#situacion"   class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow">{t("nav.ourWork")}</a>
+        <a href="#involucrarse" class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow">{t("nav.getInvolved")}</a>
+        <a href="#acerca"      class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow">{t("nav.about")}</a>
       </nav>
 
       <!-- Right controls -->
@@ -34,7 +34,7 @@ const translatePath = useTranslatedPath(lang);
         <LanguageSwitcher />
         <a
           href={translatePath("donate")}
-          class="inline-flex items-center justify-center rounded-full bg-brand-gold text-brand-navy text-sm font-bold px-5 py-2 hover:brightness-105 active:scale-95 transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+          class="inline-flex items-center justify-center rounded-full bg-brand-yellow text-brand-ink text-sm font-bold px-5 py-2 hover:brightness-105 active:scale-95 transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
         >
           {t("nav.donate")}
         </a>
@@ -57,14 +57,14 @@ const translatePath = useTranslatedPath(lang);
 
   <!-- Mobile menu -->
   <div id="mobile-menu" class="md:hidden hidden" aria-hidden="true">
-    <div class="bg-brand-navy/97 backdrop-blur-xl px-6 pb-6 pt-2 border-t border-white/10">
+    <div class="bg-brand-ink/97 backdrop-blur-xl px-6 pb-6 pt-2 border-t border-white/10">
       <nav class="flex flex-col" aria-label={t("nav.ourWork")}>
         <a href="#situacion"   class="py-4 text-white/90 font-medium text-base border-b border-white/10 hover:text-white transition-colors">{t("nav.ourWork")}</a>
         <a href="#involucrarse" class="py-4 text-white/90 font-medium text-base border-b border-white/10 hover:text-white transition-colors">{t("nav.getInvolved")}</a>
         <a href="#acerca"      class="py-4 text-white/90 font-medium text-base hover:text-white transition-colors">{t("nav.about")}</a>
         <a
           href={translatePath("donate")}
-          class="mt-5 inline-flex items-center justify-center rounded-full bg-brand-gold text-brand-navy font-bold text-base px-6 py-3.5 hover:brightness-105 transition-all"
+          class="mt-5 inline-flex items-center justify-center rounded-full bg-brand-yellow text-brand-ink font-bold text-base px-6 py-3.5 hover:brightness-105 transition-all"
         >
           {t("nav.donate")}
         </a>
@@ -77,30 +77,42 @@ const translatePath = useTranslatedPath(lang);
 </header>
 
 <script>
-  const header    = document.getElementById('site-header')!;
-  const menuBtn   = document.getElementById('menu-btn')!;
-  const mobileMenu = document.getElementById('mobile-menu')!;
+  // astro:page-load dispara en la carga inicial y tras cada navegación por
+  // View Transitions — el header ya no persiste entre páginas (su contenido
+  // depende del idioma), así que este script debe volver a atar los
+  // listeners al nuevo DOM en cada navegación.
+  // `window` sobrevive a la navegación (a diferencia del header, que se
+  // recrea en cada página) — sin quitar el listener anterior, cada
+  // navegación acumularía otro más.
+  let scrollHandler: (() => void) | null = null;
 
-  function onScroll() {
-    header.dataset.scrolled = String(window.scrollY > 40);
-  }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  document.addEventListener('astro:page-load', () => {
+    const header    = document.getElementById('site-header')!;
+    const menuBtn   = document.getElementById('menu-btn')!;
+    const mobileMenu = document.getElementById('mobile-menu')!;
 
-  let isOpen = false;
-  menuBtn.addEventListener('click', () => {
-    isOpen = !isOpen;
-    mobileMenu.classList.toggle('hidden', !isOpen);
-    mobileMenu.setAttribute('aria-hidden', String(!isOpen));
-    menuBtn.setAttribute('aria-expanded', String(isOpen));
+    if (scrollHandler) window.removeEventListener('scroll', scrollHandler);
+    scrollHandler = () => {
+      header.dataset.scrolled = String(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+    scrollHandler();
+
+    let isOpen = false;
+    menuBtn.addEventListener('click', () => {
+      isOpen = !isOpen;
+      mobileMenu.classList.toggle('hidden', !isOpen);
+      mobileMenu.setAttribute('aria-hidden', String(!isOpen));
+      menuBtn.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    mobileMenu.querySelectorAll('a').forEach(link =>
+      link.addEventListener('click', () => {
+        isOpen = false;
+        mobileMenu.classList.add('hidden');
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      })
+    );
   });
-
-  mobileMenu.querySelectorAll('a').forEach(link =>
-    link.addEventListener('click', () => {
-      isOpen = false;
-      mobileMenu.classList.add('hidden');
-      mobileMenu.setAttribute('aria-hidden', 'true');
-      menuBtn.setAttribute('aria-expanded', 'false');
-    })
-  );
 </script>

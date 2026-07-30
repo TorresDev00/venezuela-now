@@ -32,14 +32,14 @@ function slugFor(id: string) {
 
     <div class="flex items-end justify-between mb-16 reveal">
       <div>
-        <h2 id="historias-heading" class="text-4xl sm:text-5xl font-black text-brand-navy mb-2">
+        <h2 id="historias-heading" class="font-display text-4xl sm:text-5xl font-black text-brand-ink mb-2">
           {t("stories.heading")}
         </h2>
         <p class="text-base sm:text-lg text-slate-500 max-w-xl">{t("stories.subtitle")}</p>
       </div>
       <a
         href={translatePath("news")}
-        class="hidden sm:inline-flex text-sm font-semibold text-brand-cobalt hover:text-brand-navy transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+        class="hidden sm:inline-flex text-sm font-semibold text-brand-blue hover:text-brand-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
       >
         {t("stories.viewAll")}
       </a>
@@ -73,7 +73,7 @@ function slugFor(id: string) {
             </time>
             <a
               href={`${translatePath("news")}/${slugFor(featured.id)}`}
-              class="text-brand-gold text-sm font-bold hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+              class="text-brand-yellow text-sm font-bold hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
             >
               {t("stories.readMore")}
             </a>
@@ -101,7 +101,7 @@ function slugFor(id: string) {
 
             <a
               href={`${translatePath("news")}/${slugFor(story.id)}`}
-              class="relative mt-auto p-6 flex flex-col focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+              class="relative mt-auto p-6 flex flex-col focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
               aria-labelledby={`story-heading-${i}`}
             >
               <span class="inline-block bg-white/20 text-white text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-2 w-fit">

@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { ClientRouter, fade } from 'astro:transitions';
 import { defaultLang, languages } from '../i18n/ui';
 import { getLangFromUrl, getRouteKeyFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
 
@@ -32,18 +33,34 @@ const defaultUrl = new URL(translatePath(routeKey, defaultLang), Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="/logo.png" />
+    <link rel="icon" href="/logo.webp" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#0A2540" />
+    <meta name="theme-color" content="#0A0A23" />
 
     <link rel="canonical" href={canonicalUrl} />
     {alternates.map(({ code, href }) => (
       <link rel="alternate" hreflang={code} href={href} />
     ))}
     <link rel="alternate" hreflang="x-default" href={defaultUrl} />
+
+    <ClientRouter />
   </head>
-  <body>
+  <body transition:animate={fade({ duration: '0.25s' })}>
     <slot />
+
+    <script>
+      // Restaura el scroll solo cuando LanguageSwitcher.astro guardó una
+      // posición (cambio de idioma) — la navegación normal entre páginas
+      // distintas no toca sessionStorage y sigue con el scroll-to-top
+      // por defecto de Astro.
+      document.addEventListener('astro:after-swap', () => {
+        const savedY = sessionStorage.getItem('lang-switch-scroll-y');
+        if (savedY !== null) {
+          window.scrollTo({ top: Number(savedY), left: 0, behavior: 'instant' });
+          sessionStorage.removeItem('lang-switch-scroll-y');
+        }
+      });
+    </script>
   </body>
 </html>

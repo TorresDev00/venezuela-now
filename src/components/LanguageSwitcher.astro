@@ -29,6 +29,7 @@ const translatePath = useTranslatedPath(lang);
       hreflang={code}
       aria-current={code === lang ? "true" : undefined}
       aria-label={label}
+      data-lang-switch
       class:list={[
         "lang-link px-2.5 py-1 rounded-full text-xs font-bold tracking-wide transition-colors",
         code === lang && "is-active",
@@ -38,3 +39,16 @@ const translatePath = useTranslatedPath(lang);
     </a>
   ))}
 </nav>
+
+<script>
+  // Guarda la posición de scroll antes de cambiar de idioma para que
+  // Layout.astro la restaure tras el swap de View Transitions — cambiar de
+  // idioma es "el mismo contenido, otro idioma", no debe saltar al top.
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll('[data-lang-switch]').forEach((link) => {
+      link.addEventListener('click', () => {
+        sessionStorage.setItem('lang-switch-scroll-y', String(window.scrollY));
+      });
+    });
+  });
+</script>
