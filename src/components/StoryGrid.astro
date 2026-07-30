@@ -1,55 +1,47 @@
 ---
 import { Image } from "astro:assets";
-import HeroImage from "../assets/img/DSC01246.webp";
-import StoryImage1 from "../assets/img/DSC01994.webp";
-import StoryImage2 from "../assets/img/DSC01584.webp";
+import { getCollection } from "astro:content";
+import { getLangFromUrl, useTranslations, useTranslatedPath } from "../i18n/utils";
 
-const featured = {
-  tag: "Crisis humanitaria",
-  title: "El terremoto de 2024: Un país en busca de ayuda",
-  excerpt:
-    "Más de 100,000 personas perdieron sus hogares en los sismos que sacudieron el oeste de Venezuela. Aquí la historia de quienes sobrevivieron.",
-  date: "28 de julio, 2026",
-  href: "/noticias/terremoto-2024",
-  image: HeroImage,
-  alt: "Edificios afectados por el terremoto en Venezuela",
-};
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
 
-const stories = [
-  {
-    tag: "Testimonio",
-    title: "«Gracias a Venezuela NOW tengo dónde dormir esta noche»",
-    date: "21 de julio, 2026",
-    href: "/noticias/testimonio-refugio",
-    image: StoryImage1,
-    alt: "Familia venezolana recibiendo ayuda humanitaria",
-  },
-  {
-    tag: "Actualización",
-    title: "Primer convoy de ayuda llega a las zonas más afectadas",
-    date: "15 de julio, 2026",
-    href: "/noticias/primer-convoy",
-    image: StoryImage2,
-    alt: "Convoy de ayuda humanitaria llegando a zona afectada",
-  },
-];
+// timeZone: "UTC" evita que las fechas (parseadas como medianoche UTC desde
+// el frontmatter) se muestren un día antes en servidores con zona horaria
+// negativa respecto a UTC.
+const dateFormatter = new Intl.DateTimeFormat(lang === "es" ? "es" : "en-US", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const allStories = await getCollection("stories", ({ id }) => id.startsWith(`${lang}/`));
+const sorted = allStories.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const featured = sorted.find((s) => s.data.featured) ?? sorted[0];
+const secondary = sorted.filter((s) => s.id !== featured.id).slice(0, 2);
+
+function slugFor(id: string) {
+  return id.slice(id.indexOf("/") + 1);
+}
 ---
 
 <section id="historias" class="py-24 bg-white" aria-labelledby="historias-heading">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <div class="flex items-end justify-between mb-12 reveal">
+    <div class="flex items-end justify-between mb-16 reveal">
       <div>
-        <h2 id="historias-heading" class="text-3xl sm:text-4xl font-extrabold text-brand-navy mb-2">
-          Historias y noticias
+        <h2 id="historias-heading" class="text-4xl sm:text-5xl font-black text-brand-navy mb-2">
+          {t("stories.heading")}
         </h2>
-        <p class="text-slate-600">Lo que está pasando en el terreno.</p>
+        <p class="text-base sm:text-lg text-slate-500 max-w-xl">{t("stories.subtitle")}</p>
       </div>
       <a
-        href="/noticias"
+        href={translatePath("news")}
         class="hidden sm:inline-flex text-sm font-semibold text-brand-cobalt hover:text-brand-navy transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
       >
-        Ver todas →
+        {t("stories.viewAll")}
       </a>
     </div>
 
@@ -58,30 +50,32 @@ const stories = [
       <!-- Tarjeta destacada -->
       <article class="lg:col-span-2 relative overflow-hidden rounded-3xl reveal min-h-96 sm:min-h-96 flex flex-col pt-24" aria-labelledby="featured-heading">
         <Image
-          src={featured.image}
-          alt={featured.alt}
+          src={featured.data.image}
+          alt={featured.data.imageAlt}
           class="absolute inset-0 w-full h-full object-cover"
           loading="eager"
           widths={[480, 768, 1200]}
           sizes="(min-width: 1024px) 66vw, 100vw"
         />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" aria-hidden="true"></div>
+        <div class="absolute inset-0 photo-overlay-strong" aria-hidden="true"></div>
 
         <div class="relative mt-auto p-8 sm:p-10">
           <span class="inline-block bg-brand-crimson text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
-            {featured.tag}
+            {featured.data.tag}
           </span>
           <h3 id="featured-heading" class="text-2xl sm:text-3xl font-extrabold text-white mb-3 leading-tight">
-            {featured.title}
+            {featured.data.title}
           </h3>
-          <p class="text-white/75 mb-5 leading-relaxed">{featured.excerpt}</p>
+          <p class="text-white/75 mb-5 leading-relaxed">{featured.data.excerpt}</p>
           <div class="flex items-center justify-between">
-            <time class="text-white/45 text-sm">{featured.date}</time>
+            <time class="text-white/45 text-sm" datetime={featured.data.date.toISOString()}>
+              {dateFormatter.format(featured.data.date)}
+            </time>
             <a
-              href={featured.href}
+              href={`${translatePath("news")}/${slugFor(featured.id)}`}
               class="text-brand-gold text-sm font-bold hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
             >
-              Leer más →
+              {t("stories.readMore")}
             </a>
           </div>
         </div>
@@ -89,34 +83,36 @@ const stories = [
 
       <!-- Tarjetas secundarias -->
       <div class="flex flex-col gap-6">
-        {stories.map((story, i) => (
+        {secondary.map((story, i) => (
           <article
             class="relative overflow-hidden rounded-3xl flex flex-col flex-1 reveal min-h-44"
             style={`transition-delay: ${(i + 1) * 0.1}s`}
             aria-labelledby={`story-heading-${i}`}
           >
             <Image
-              src={story.image}
-              alt={story.alt}
+              src={story.data.image}
+              alt={story.data.imageAlt}
               class="absolute inset-0 w-full h-full object-cover"
               loading="lazy"
               widths={[320, 480, 640]}
               sizes="(min-width: 1024px) 33vw, 100vw"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" aria-hidden="true"></div>
+            <div class="absolute inset-0 photo-overlay-strong" aria-hidden="true"></div>
 
             <a
-              href={story.href}
+              href={`${translatePath("news")}/${slugFor(story.id)}`}
               class="relative mt-auto p-6 flex flex-col focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
               aria-labelledby={`story-heading-${i}`}
             >
               <span class="inline-block bg-white/20 text-white text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-2 w-fit">
-                {story.tag}
+                {story.data.tag}
               </span>
               <h3 id={`story-heading-${i}`} class="text-base font-bold text-white leading-snug mb-2">
-                {story.title}
+                {story.data.title}
               </h3>
-              <time class="text-white/45 text-xs">{story.date}</time>
+              <time class="text-white/45 text-xs" datetime={story.data.date.toISOString()}>
+                {dateFormatter.format(story.data.date)}
+              </time>
             </a>
           </article>
         ))}

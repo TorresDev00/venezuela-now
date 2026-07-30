@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+// timeZone: 'UTC' evita que las fechas se muestren un día antes en
+// servidores con zona horaria negativa respecto a UTC.
+const dateFormatter = new Intl.DateTimeFormat(lang === 'es' ? 'es' : 'en-US', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+const stories = (await getCollection('stories', ({ id }) => id.startsWith(`${lang}/`)))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+function slugFor(id: string) {
+  return id.slice(id.indexOf('/') + 1);
+}
+---
+
+<Layout title={t('newsPage.heading')}>
+  <Header />
+  <main id="main-content" class="pt-32 pb-24 min-h-[60vh]">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-4xl sm:text-5xl font-black text-brand-navy mb-12">{t('newsPage.heading')}</h1>
+
+      <ul class="space-y-8">
+        {stories.map((story) => (
+          <li class="border-b border-slate-200 pb-8">
+            <span class="inline-block bg-brand-crimson text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
+              {story.data.tag}
+            </span>
+            <h2 class="text-xl font-bold text-brand-navy mb-2 leading-snug">
+              <a href={`${translatePath('news')}/${slugFor(story.id)}`} class="hover:text-brand-cobalt transition-colors">
+                {story.data.title}
+              </a>
+            </h2>
+            <p class="text-slate-600 mb-2">{story.data.excerpt}</p>
+            <time class="text-slate-400 text-sm" datetime={story.data.date.toISOString()}>
+              {dateFormatter.format(story.data.date)}
+            </time>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </main>
+  <Footer />
+</Layout>

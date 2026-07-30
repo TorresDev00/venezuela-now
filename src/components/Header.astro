@@ -1,5 +1,10 @@
 ---
-// No props
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import { getLangFromUrl, useTranslations, useTranslatedPath } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
 ---
 
 <header id="site-header" class="fixed top-0 left-0 right-0 z-50" data-scrolled="false">
@@ -7,7 +12,7 @@
     <div class="flex items-center justify-between h-16">
 
       <!-- Logo -->
-      <a href="/" aria-label="Venezuela NOW – Inicio" class="flex-shrink-0">
+      <a href={translatePath("home")} aria-label={t("nav.homeAria")} class="flex-shrink-0">
         <img
           src="/logo.png"
           alt="Venezuela NOW"
@@ -18,22 +23,20 @@
       </a>
 
       <!-- Desktop nav -->
-      <nav class="hidden md:flex items-center gap-8" aria-label="Navegación principal">
-        <a href="#situacion"   class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">Nuestro trabajo</a>
-        <a href="#involucrarse" class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">Involucrarse</a>
-        <a href="#acerca"      class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">Acerca de</a>
+      <nav class="hidden md:flex items-center gap-8" aria-label={t("nav.ourWork")}>
+        <a href="#situacion"   class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">{t("nav.ourWork")}</a>
+        <a href="#involucrarse" class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">{t("nav.getInvolved")}</a>
+        <a href="#acerca"      class="header-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold">{t("nav.about")}</a>
       </nav>
 
       <!-- Right controls -->
       <div class="flex items-center gap-3">
-        <span class="hidden md:inline-flex items-center border rounded-full px-3 py-1 text-xs font-bold tracking-wide header-lang">
-          ES
-        </span>
+        <LanguageSwitcher />
         <a
-          href="/donar"
+          href={translatePath("donate")}
           class="inline-flex items-center justify-center rounded-full bg-brand-gold text-brand-navy text-sm font-bold px-5 py-2 hover:brightness-105 active:scale-95 transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
         >
-          Donar
+          {t("nav.donate")}
         </a>
         <!-- Hamburger (mobile) -->
         <button
@@ -42,7 +45,7 @@
           class="md:hidden flex flex-col justify-center items-center gap-1.5 w-10 h-10 rounded-lg"
           aria-expanded="false"
           aria-controls="mobile-menu"
-          aria-label="Abrir menú de navegación"
+          aria-label={t("nav.openMenu")}
         >
           <span class="ham-bar"></span>
           <span class="ham-bar"></span>
@@ -55,16 +58,19 @@
   <!-- Mobile menu -->
   <div id="mobile-menu" class="md:hidden hidden" aria-hidden="true">
     <div class="bg-brand-navy/97 backdrop-blur-xl px-6 pb-6 pt-2 border-t border-white/10">
-      <nav class="flex flex-col" aria-label="Menú móvil">
-        <a href="#situacion"   class="py-4 text-white/90 font-medium text-base border-b border-white/10 hover:text-white transition-colors">Nuestro trabajo</a>
-        <a href="#involucrarse" class="py-4 text-white/90 font-medium text-base border-b border-white/10 hover:text-white transition-colors">Involucrarse</a>
-        <a href="#acerca"      class="py-4 text-white/90 font-medium text-base hover:text-white transition-colors">Acerca de</a>
+      <nav class="flex flex-col" aria-label={t("nav.ourWork")}>
+        <a href="#situacion"   class="py-4 text-white/90 font-medium text-base border-b border-white/10 hover:text-white transition-colors">{t("nav.ourWork")}</a>
+        <a href="#involucrarse" class="py-4 text-white/90 font-medium text-base border-b border-white/10 hover:text-white transition-colors">{t("nav.getInvolved")}</a>
+        <a href="#acerca"      class="py-4 text-white/90 font-medium text-base hover:text-white transition-colors">{t("nav.about")}</a>
         <a
-          href="/donar"
+          href={translatePath("donate")}
           class="mt-5 inline-flex items-center justify-center rounded-full bg-brand-gold text-brand-navy font-bold text-base px-6 py-3.5 hover:brightness-105 transition-all"
         >
-          Donar ahora
+          {t("nav.donate")}
         </a>
+        <div class="mt-5 pt-5 border-t border-white/10 flex justify-center">
+          <LanguageSwitcher variant="dark" />
+        </div>
       </nav>
     </div>
   </div>

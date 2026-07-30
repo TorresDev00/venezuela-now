@@ -1,0 +1,96 @@
+---
+import Layout      from '../layouts/Layout.astro';
+import Header      from './Header.astro';
+import Hero        from './Hero.astro';
+import StatCard    from './StatCard.astro';
+import StoryGrid   from './StoryGrid.astro';
+import AboutImpact from './Aboutimpact.astro';
+import CtaBand     from './CtaBand.astro';
+import Footer      from './Footer.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const stats = [
+  {
+    // TODO: reemplazar por cifra confirmada por el cliente
+    number: "45,000+",
+    label: t("situation.stat1Label"),
+    description: t("situation.stat1Desc"),
+    accent: "crimson" as const,
+  },
+  {
+    // TODO: reemplazar por cifra confirmada por el cliente
+    number: "8,200+",
+    label: t("situation.stat2Label"),
+    description: t("situation.stat2Desc"),
+    accent: "cobalt" as const,
+  },
+  {
+    // TODO: reemplazar por cifra confirmada por el cliente
+    number: "34",
+    label: t("situation.stat3Label"),
+    description: t("situation.stat3Desc"),
+    accent: "gold" as const,
+  },
+];
+---
+
+<Layout>
+  <Header />
+
+  <main id="main-content">
+    <Hero />
+
+    <!-- ── Sección: La situación ──────────────────────────────────────── -->
+    <section id="situacion" class="py-24 bg-white" aria-labelledby="situacion-heading">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mb-16 reveal">
+          <h2 id="situacion-heading" class="text-4xl sm:text-5xl font-black text-brand-navy mb-4">
+            {t("situation.heading")}
+          </h2>
+          <p class="text-base sm:text-lg text-slate-500 max-w-xl leading-relaxed">
+            {t("situation.body")}
+          </p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {stats.map((stat, i) => (
+            <div class="reveal" style={`transition-delay: ${i * 0.1}s`}>
+              <StatCard
+                number={stat.number}
+                label={stat.label}
+                description={stat.description}
+                accent={stat.accent}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <StoryGrid />
+    <AboutImpact />
+    <CtaBand />
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  // Scroll-reveal con IntersectionObserver
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.1, rootMargin: '0px 0px -60px 0px' }
+  );
+
+  document.querySelectorAll<Element>('.reveal').forEach((el) => observer.observe(el));
+</script>

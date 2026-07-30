@@ -1,22 +1,18 @@
 ---
 import { Image } from "astro:assets";
 import VideoPoster from "../assets/img/DSC01246.webp";
-import BadgeEcfa from "../../public/logo.png";
-import BadgeForbes from "../../public/logo.png";
-import BadgeTransparent from "../../public/logo.png";
+import { getLangFromUrl, useTranslations, useTranslatedPath } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
 
 // TODO: reemplaza estos valores por datos reales / Content Collection
 const stats = [
-  { icon: "globe", value: "12", suffix: "K+", label: "Personas ayudadas" },
-  { icon: "hands", value: "480", suffix: "+", label: "Voluntarios movilizados" },
-  { icon: "box", value: "3.2", suffix: "M+", label: "En ayuda entregada", prefix: "$" },
-  { icon: "meal", value: "45", suffix: "K+", label: "Comidas servidas" },
-];
-
-const badges = [
-  { src: BadgeForbes, alt: "Forbes America's Top Charities 2025–2026" },
-  { src: BadgeEcfa, alt: "ECFA Accredited" },
-  { src: BadgeTransparent, alt: "Excellence in Giving — Certified Transparent" },
+  { icon: "globe", value: "12", suffix: "K+", label: t("about.stat1Label") },
+  { icon: "hands", value: "480", suffix: "+", label: t("about.stat2Label") },
+  { icon: "box", value: "3.2", suffix: "M+", label: t("about.stat3Label"), prefix: "$" },
+  { icon: "meal", value: "45", suffix: "K+", label: t("about.stat4Label") },
 ];
 
 const icons: Record<string, string> = {
@@ -33,7 +29,7 @@ const icons: Record<string, string> = {
 
 <section
   id="quienes-somos"
-  class="relative overflow-hidden bg-brand-cobalt py-24"
+  class="relative overflow-hidden bg-gradient-to-br from-brand-navy to-brand-cobalt py-24"
   aria-labelledby="about-heading"
 >
   <!-- glow decorativo sutil -->
@@ -47,42 +43,32 @@ const icons: Record<string, string> = {
     <!-- Columna izquierda: texto -->
     <div class="reveal">
       <span class="block text-xs font-bold tracking-[0.2em] uppercase text-white/60 mb-4">
-        Quiénes somos
+        {t("about.eyebrow")}
       </span>
 
-      <h2 id="about-heading" class="text-4xl sm:text-5xl font-extrabold text-white leading-[1.05] mb-6">
-        Una pasión
-        <span class="relative inline-block font-serif italic font-semibold text-white">
-           firme 
+      <h2 id="about-heading" class="text-4xl sm:text-5xl font-black text-white leading-[1.05] mb-6">
+        {t("about.titlePre")}{" "}
+        <span class="relative inline-block font-serif italic font-bold text-white">
+          {t("about.titleHighlight")}
           <span
             class="absolute left-0 -bottom-1 h-1 w-full bg-brand-gold rounded-full"
             aria-hidden="true"
           ></span>
-        </span>
-        por reconstruir Venezuela.
+        </span>{" "}
+        {t("about.titlePost")}
       </h2>
 
-      <!-- Badges de confianza -->
-      <div class="flex flex-wrap items-center gap-4 mb-8">
-        {badges.map((badge) => (
-          <div class="glass rounded-2xl p-2.5">
-            <Image src={badge.src} alt={badge.alt} class="h-12 w-auto" loading="lazy" />
-          </div>
-        ))}
-      </div>
+      {/* TODO: agregar badges reales cuando el cliente confirme qué acreditaciones tiene */}
 
       <p class="text-white/80 leading-relaxed mb-6 max-w-md">
-        Ya sea llevando refugio, agua potable, alimentos o atención médica,
-        el objetivo de Venezuela NOW es acercar ayuda real a quienes más la
-        necesitan tras los terremotos. Trabajamos con una red de voluntarios
-        y socios locales para que cada donación llegue a su destino.
+        {t("about.body")}
       </p>
 
       <a
-        href="/nosotros"
+        href={translatePath("about")}
         class="inline-flex items-center gap-2 text-sm font-bold text-white border-b-2 border-brand-gold pb-0.5 hover:text-brand-gold transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-gold"
       >
-        Conoce más sobre nosotros
+        {t("about.linkMore")}
       </a>
     </div>
 
@@ -94,10 +80,11 @@ const icons: Record<string, string> = {
         id="about-video"
         class="glass relative overflow-hidden rounded-3xl aspect-video mb-10"
         data-youtube-id="TODO_VIDEO_ID"
+        data-video-title={t("about.videoTitle")}
       >
         <Image
           src={VideoPoster}
-          alt="Voluntarios de Venezuela NOW en labores de ayuda"
+          alt={t("about.videoAlt")}
           class="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
           widths={[480, 768, 1024]}
@@ -108,7 +95,7 @@ const icons: Record<string, string> = {
         <button
           type="button"
           id="about-video-play"
-          aria-label="Reproducir video: nuestra labor en Venezuela"
+          aria-label={t("about.videoPlayAria")}
           class="absolute inset-0 flex items-center justify-center group focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-gold"
         >
           <span
@@ -122,7 +109,7 @@ const icons: Record<string, string> = {
       </div>
 
       <!-- Estadísticas -->
-      <p class="font-serif italic text-2xl text-white/90 mb-6">Desde 2026:</p>
+      <p class="font-serif italic font-bold text-2xl text-white/90 mb-6">{t("about.since")}</p>
 
       <dl class="grid grid-cols-2 gap-x-8 gap-y-8">
         {stats.map((stat, i) => (
@@ -138,7 +125,7 @@ const icons: Record<string, string> = {
                 <span class="text-3xl font-extrabold text-white">
                   {stat.prefix}{stat.value}
                 </span>
-                <span class="text-xl font-serif italic text-white/90">{stat.suffix}</span>
+                <span class="text-xl font-serif italic font-bold text-white/90">{stat.suffix}</span>
               </dd>
               <p class="text-sm font-semibold text-white/70 border-b-2 border-white/20 inline-block pb-0.5 mt-0.5">
                 {stat.label}
@@ -160,12 +147,12 @@ const icons: Record<string, string> = {
     if (!wrapper) return;
     const videoId = wrapper.dataset.youtubeId;
     if (!videoId || videoId.startsWith("TODO")) {
-      console.warn("Falta configurar data-youtube-id en AboutImpact.astro");
+      console.warn("Missing data-youtube-id in Aboutimpact.astro");
       return;
     }
     const iframe = document.createElement("iframe");
     iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
-    iframe.title = "Video: nuestra labor en Venezuela";
+    iframe.title = wrapper.dataset.videoTitle ?? "";
     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture";
     iframe.allowFullscreen = true;
     iframe.className = "absolute inset-0 h-full w-full";

@@ -1,0 +1,40 @@
+---
+import { languages } from "../i18n/ui";
+import { getLangFromUrl, getRouteKeyFromUrl, useTranslations, useTranslatedPath } from "../i18n/utils";
+
+interface Props {
+  // "header": sigue el estado de scroll del header (claro sobre foto → oscuro
+  // sobre fondo blanco). "dark": siempre claro sobre fondo oscuro fijo — para
+  // el menú móvil o el footer, donde el fondo no cambia con el scroll.
+  variant?: "header" | "dark";
+}
+const { variant = "header" } = Astro.props;
+
+const lang = getLangFromUrl(Astro.url);
+const routeKey = getRouteKeyFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+---
+
+<nav
+  aria-label={t("nav.langLabel")}
+  class:list={[
+    "flex items-center gap-1 border rounded-full p-0.5",
+    variant === "header" ? "header-lang" : "lang-on-dark",
+  ]}
+>
+  {Object.entries(languages).map(([code, label]) => (
+    <a
+      href={translatePath(routeKey, code as keyof typeof languages)}
+      hreflang={code}
+      aria-current={code === lang ? "true" : undefined}
+      aria-label={label}
+      class:list={[
+        "lang-link px-2.5 py-1 rounded-full text-xs font-bold tracking-wide transition-colors",
+        code === lang && "is-active",
+      ]}
+    >
+      {code.toUpperCase()}
+    </a>
+  ))}
+</nav>

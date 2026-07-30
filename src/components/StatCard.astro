@@ -3,11 +3,18 @@ interface Props {
   number: string;
   label: string;
   description: string;
+  accent?: "crimson" | "cobalt" | "gold";
 }
-const { number, label, description } = Astro.props;
+const { number, label, description, accent = "crimson" } = Astro.props;
+
+const accentBorder: Record<string, string> = {
+  crimson: "border-t-brand-crimson",
+  cobalt: "border-t-brand-cobalt",
+  gold: "border-t-brand-gold",
+};
 ---
 
-<div class="glass rounded-3xl p-8 flex flex-col h-full">
+<div class={`glass-light rounded-3xl p-8 flex flex-col h-full border-t-4 ${accentBorder[accent]}`}>
   <div class="text-5xl sm:text-6xl font-black text-brand-navy leading-none mb-2">{number}</div>
   <div class="text-brand-cobalt font-bold text-sm uppercase tracking-wide mb-3">{label}</div>
   <p class="text-slate-600 text-sm leading-relaxed">{description}</p>

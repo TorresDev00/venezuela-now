@@ -1,28 +1,34 @@
 ---
+import { getLangFromUrl, useTranslations, useTranslatedPath } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
 const navLinks = [
-  { href: "#situacion",    label: "Nuestro trabajo" },
-  { href: "#involucrarse", label: "Involucrarse" },
-  { href: "#historias",    label: "Noticias" },
-  { href: "/donar",        label: "Donar" },
+  { href: "#situacion",    label: t("nav.ourWork") },
+  { href: "#involucrarse", label: t("nav.getInvolved") },
+  { href: "#historias",    label: t("nav.news") },
+  { href: translatePath("donate"), label: t("nav.donate") },
 ];
 
 const legalLinks = [
-  { href: "/privacidad", label: "Política de privacidad" },
-  { href: "/terminos",   label: "Términos de uso" },
+  { href: translatePath("privacy"), label: t("footer.privacy") },
+  { href: translatePath("terms"),   label: t("footer.terms") },
 ];
 
 const year = new Date().getFullYear();
 ---
 
 <footer id="acerca" class="bg-brand-navy text-white pt-16 pb-10" aria-labelledby="footer-heading">
-  <h2 id="footer-heading" class="sr-only">Pie de página</h2>
+  <h2 id="footer-heading" class="sr-only">{t("footer.srHeading")}</h2>
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
 
       <!-- Marca y misión -->
       <div class="lg:col-span-2">
-        <a href="/" aria-label="Venezuela NOW – Inicio">
+        <a href={translatePath("home")} aria-label={t("nav.homeAria")}>
           <img
             src="/logo.png"
             alt="Venezuela NOW"
@@ -31,15 +37,13 @@ const year = new Date().getFullYear();
           />
         </a>
         <p class="text-white/65 text-sm leading-relaxed max-w-xs">
-          Venezuela NOW, Inc. es una organización sin fines de lucro 501(c)(3)
-          dedicada a apoyar a los sobrevivientes de los desastres naturales
-          en Venezuela.
+          {t("footer.mission")}
         </p>
       </div>
 
       <!-- Navegación -->
       <div>
-        <h3 class="text-xs font-bold uppercase tracking-widest text-white/35 mb-5">Navegación</h3>
+        <h3 class="text-xs font-bold uppercase tracking-widest text-white/35 mb-5">{t("footer.navHeading")}</h3>
         <ul class="space-y-3">
           {navLinks.map(link => (
             <li>
@@ -56,7 +60,7 @@ const year = new Date().getFullYear();
 
       <!-- Legal -->
       <div>
-        <h3 class="text-xs font-bold uppercase tracking-widest text-white/35 mb-5">Legal</h3>
+        <h3 class="text-xs font-bold uppercase tracking-widest text-white/35 mb-5">{t("footer.legalHeading")}</h3>
         <ul class="space-y-3">
           {legalLinks.map(link => (
             <li>
@@ -71,10 +75,10 @@ const year = new Date().getFullYear();
         </ul>
         <div class="mt-6">
           <a
-            href="/donar"
+            href={translatePath("donate")}
             class="inline-flex items-center justify-center rounded-full bg-brand-gold text-brand-navy font-bold text-sm px-5 py-2.5 hover:brightness-105 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
           >
-            Donar ahora
+            {t("footer.donateButton")}
           </a>
         </div>
       </div>
@@ -83,13 +87,13 @@ const year = new Date().getFullYear();
     <!-- Barra inferior -->
     <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
       <div class="text-white/35 text-xs space-y-1">
-        <!-- TODO: Reemplaza TODO-EIN-XXXXXXXXX con el EIN real de Venezuela NOW, Inc. -->
-        <p>Venezuela NOW, Inc. · Organización 501(c)(3) · EIN: TODO-EIN-XXXXXXXXX</p>
-        <p>© {year} Venezuela NOW, Inc. Todos los derechos reservados.</p>
+        {/* TODO: reemplazar por el EIN real de Venezuela NOW, Inc. una vez confirmado */}
+        <p>{t("footer.orgLine")}</p>
+        <p>© {year} Venezuela NOW, Inc. {t("footer.allRightsReserved")}</p>
       </div>
       <p class="text-white/35 text-xs max-w-xs text-left sm:text-right leading-relaxed">
-        Pagos procesados de forma segura por Stripe.<br />
-        No almacenamos datos de tarjeta.
+        {t("footer.stripeLine1")}<br />
+        {t("footer.stripeLine2")}
       </p>
     </div>
   </div>
