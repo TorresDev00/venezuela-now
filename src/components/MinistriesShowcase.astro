@@ -1,0 +1,323 @@
+---
+import { Image } from "astro:assets";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+import SemwesvenLogo        from "../assets/img/logos/Seminario Wesleyano.webp";
+import PanoramaLogo         from "../assets/img/logos/Panorama.webp";
+import GrowSchoolLogo       from "../assets/img/logos/Grow School.webp";
+import IliLogo              from "../assets/img/logos/ILI.webp";
+import WesleyLogo           from "../assets/img/logos/Centro Wesley.webp";
+import IglesiaMetodistaLogo from "../assets/img/logos/Iglesia Metodista.webp";
+
+// Nota: el archivo de la foto de Grow School tiene un typo en disco
+// ("Shool"), se usa tal cual está guardado — el nombre mostrado al usuario
+// (name_en/alt) sí dice "Grow School" correctamente.
+import SeminarioPhoto   from "../assets/img/organizaciones/Seminario.webp";
+import PanoramaPhoto    from "../assets/img/organizaciones/Panorama.webp";
+import GrowSchoolPhoto  from "../assets/img/organizaciones/Grow Shool.webp";
+import IliPhoto         from "../assets/img/organizaciones/ILI.webp";
+import WesleyPhoto      from "../assets/img/organizaciones/Centro Medico.webp";
+import IglesiaPhoto     from "../assets/img/organizaciones/Iglesia.webp";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Copia independiente de OrganizationsGrid.astro a propósito (ver brief):
+// este componente debe poder evolucionar solo, sin acoplarse al grid estático
+// que se conserva comentado como alternativa.
+const ministries = [
+  {
+    id: "semwesven",
+    name_en: "Wesleyan Seminary of Venezuela",
+    name_es: "Seminario Wesleyano de Venezuela",
+    tagline_en: "Prepared minds, burning hearts",
+    tagline_es: "Mente preparada, corazón ardiente",
+    description_en:
+      "**147 active students.** Training pastors and lay leaders in sound theology and practical ministry since 2002, preparing the next generation of the Venezuelan church.",
+    description_es:
+      "**147 estudiantes activos.** Formando pastores y líderes laicos en teología sólida y ministerio práctico desde 2002, preparando a la próxima generación de la iglesia venezolana.",
+    logo: SemwesvenLogo,
+    photo: SeminarioPhoto,
+    photoAlt_en: "Graduates at a Wesleyan Seminary of Venezuela ceremony",
+    photoAlt_es: "Graduados en una ceremonia del Seminario Wesleyano de Venezuela",
+  },
+  {
+    id: "panorama",
+    name_en: "Panorama",
+    name_es: "Panorama",
+    tagline_en: "First aid for pastors and leaders",
+    tagline_es: "Primeros auxilios para pastores y líderes",
+    description_en:
+      "**25 graduates in 2025.** An intensive 12-course track for pastors and leaders without formal theological training, closing the leadership gap left by migration — with 50 more currently enrolled.",
+    description_es:
+      "**25 graduados en 2025.** Un programa intensivo de 12 cursos para pastores y líderes sin formación teológica formal, que cierra el vacío de liderazgo dejado por la migración — con 50 estudiantes cursando actualmente.",
+    logo: PanoramaLogo,
+    photo: PanoramaPhoto,
+    photoAlt_en: "Pastors and leaders studying during a Panorama training session",
+    photoAlt_es: "Pastores y líderes estudiando durante una sesión de formación de Panorama",
+  },
+  {
+    id: "grow-school",
+    name_en: "Grow School",
+    name_es: "Zonas Crecer",
+    tagline_en: "Raising an extraordinary generation",
+    tagline_es: "Formamos una generación extraordinaria",
+    description_en:
+      "**280 children served.** Christian primary education and academic support out of local church campuses, growing toward 400 students as the program expands.",
+    description_es:
+      "**280 niños atendidos.** Educación cristiana primaria y apoyo académico desde campus de iglesias locales, en camino a alcanzar 400 estudiantes conforme crece el programa.",
+    logo: GrowSchoolLogo,
+    photo: GrowSchoolPhoto,
+    photoAlt_en: "A Grow School student giving a thumbs up in class",
+    photoAlt_es: "Un estudiante de Zonas Crecer sonriendo en clase",
+  },
+  {
+    id: "ili",
+    name_en: "International Leadership Institute",
+    name_es: "Instituto de Liderazgo Internacional",
+    tagline_en: "Training leaders, spreading the gospel",
+    tagline_es: "Capacitar líderes, propagar el evangelio",
+    description_en:
+      "**5,000+ leaders trained.** An international training program built on 8 core values — among them intimacy with God, passion for the harvest, and multiplication.",
+    description_es:
+      "**Más de 5.000 líderes capacitados.** Un programa internacional de formación basado en 8 valores fundamentales — entre ellos intimidad con Dios, pasión por la cosecha y multiplicación.",
+    logo: IliLogo,
+    photo: IliPhoto,
+    photoAlt_en: "An ILI leader speaking on stage at a Venezuela event",
+    photoAlt_es: "Una líder del ILI hablando en un evento en Venezuela",
+  },
+  {
+    id: "wesley-medical",
+    name_en: "Wesley Medical Center",
+    name_es: "Centro Médico Wesley",
+    tagline_en: "Comprehensive care with excellence",
+    tagline_es: "Salud integral con excelencia",
+    description_en:
+      "**16,000+ patients in 2025.** A network of 6 medical centers bringing free and low-cost care to communities in need, including mobile health fairs across the country.",
+    description_es:
+      "**Más de 16.000 pacientes en 2025.** Una red de 6 centros médicos que lleva atención gratuita y de bajo costo a comunidades que lo necesitan, incluyendo ferias de salud móviles en todo el país.",
+    logo: WesleyLogo,
+    photo: WesleyPhoto,
+    photoAlt_en: "A Wesley Medical Center volunteer delivering aid from a mobile unit",
+    photoAlt_es: "Un voluntario del Centro Médico Wesley entregando ayuda desde una unidad móvil",
+  },
+  {
+    id: "iglesia-metodista",
+    name_en: "Global Methodist Church of Venezuela",
+    name_es: "Iglesia Metodista de Venezuela",
+    tagline_en: "Restored families reaching nations for Christ",
+    tagline_es: "Familias restauradas alcanzando naciones para Cristo",
+    description_en:
+      "**60 congregations strong.** The church body Venezuela Now exists to serve, gathering thousands of believers each year through local services, conferences, and events.",
+    description_es:
+      "**60 congregaciones consolidadas.** El cuerpo eclesial al que sirve Venezuela Now, que reúne a miles de creyentes cada año en cultos, conferencias y eventos.",
+    logo: IglesiaMetodistaLogo,
+    photo: IglesiaPhoto,
+    photoAlt_en: "Members of the Global Methodist Church of Venezuela community",
+    photoAlt_es: "Miembros de la comunidad de la Iglesia Metodista de Venezuela",
+  },
+];
+
+// Contenedor de logo de tamaño fijo e idéntico para los 6 ministerios.
+// Un solo elemento de logo por ministerio (vive dentro del botón, visible
+// tanto colapsado como expandido) — nada de instancias duplicadas.
+const logoBoxClass =
+  "h-10 w-36 flex items-center justify-center shrink-0 transition-all duration-500 ease-out motion-reduce:transition-none group-data-[active=true]:h-12 group-data-[active=true]:w-44";
+
+// El copy de descripción marca su cifra clave con **negrita**; esto la
+// resalta como "término" seguido de la descripción, igual que el patrón de
+// Apple. set:html es seguro aquí: el texto lo autoramos nosotros, no viene
+// de input de usuario.
+function withBold(text: string): string {
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-brand-ink">$1</strong>');
+}
+---
+
+<section id="ministerios-showcase" class="py-24" aria-labelledby="showcase-heading">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <div class="max-w-2xl mb-12 reveal">
+      <h2 id="showcase-heading" class="font-display text-4xl sm:text-5xl font-black text-brand-ink mb-4">
+        {t("showcase.heading")}
+      </h2>
+      <p class="text-base sm:text-lg text-slate-500 max-w-xl leading-relaxed">
+        {t("showcase.subtitle")}
+      </p>
+    </div>
+
+    <div
+      class="ministries-showcase relative flex flex-col lg:block rounded-3xl overflow-hidden lg:min-h-[640px] reveal"
+    >
+      <!-- Capa 1: fotografías (las 6 precargadas, crossfade por opacidad) -->
+      <div class="relative w-full h-56 sm:h-72 lg:h-full lg:absolute lg:inset-0" aria-hidden="true">
+        {ministries.map((m, i) => (
+          <div
+            class="showcase-photo absolute inset-0 opacity-0 scale-105 transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none data-[active=true]:opacity-100 data-[active=true]:scale-100"
+            data-index={i}
+            data-active={i === 0 ? "true" : "false"}
+          >
+            <Image
+              src={m.photo}
+              alt={lang === "es" ? m.photoAlt_es : m.photoAlt_en}
+              class="w-full h-full object-cover"
+              widths={[480, 768, 1200, 1600]}
+              sizes="100vw"
+              loading={i === 0 ? "eager" : "lazy"}
+            />
+          </div>
+        ))}
+      </div>
+
+      <!-- Capa 2: scrim de legibilidad (solo overlay en desktop; en móvil la UI vive debajo de la foto, no encima) -->
+      <div
+        class="hidden lg:block lg:absolute lg:inset-0 bg-gradient-to-r from-brand-ink/95 via-brand-ink/65 to-transparent pointer-events-none"
+        aria-hidden="true"
+      ></div>
+
+      <!-- Capa 3: UI (flechas + píldoras) -->
+      <div
+        class="relative z-10 flex items-stretch gap-3 px-5 py-8 sm:px-8 bg-brand-ink lg:bg-transparent lg:absolute lg:inset-0 lg:items-center lg:px-14 lg:py-0"
+      >
+        <!-- Flechas de navegación: solo desktop, se toca la píldora directamente en móvil -->
+        <div class="hidden lg:flex flex-col gap-2 self-center shrink-0">
+          <button
+            type="button"
+            class="showcase-nav-prev h-10 w-10 rounded-full bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
+            aria-label={t("showcase.prevAria")}
+          >
+            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="showcase-nav-next h-10 w-10 rounded-full bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
+            aria-label={t("showcase.nextAria")}
+          >
+            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Columna de píldoras -->
+        <div class="showcase-pills flex flex-col gap-2.5 lg:gap-3 w-full lg:w-auto justify-center">
+          {ministries.map((m, i) => {
+            const name = lang === "es" ? m.name_es : m.name_en;
+            const tagline = lang === "es" ? m.tagline_es : m.tagline_en;
+            const description = lang === "es" ? m.description_es : m.description_en;
+            return (
+              <div
+                class="showcase-item group relative flex flex-col overflow-hidden
+                       w-full lg:w-56 lg:data-[active=true]:w-full lg:data-[active=true]:max-w-md
+                       rounded-[28px] data-[active=true]:rounded-[20px]
+                       bg-white/50 data-[active=true]:bg-white/60
+                       backdrop-blur-md data-[active=true]:backdrop-blur-lg
+                       border border-white/40 shadow-[0_4px_16px_rgba(0,0,0,0.2)]
+                       transition-all duration-500 ease-out motion-reduce:transition-none
+                       hover:scale-[1.02] data-[active=true]:hover:scale-100"
+                data-index={i}
+                data-active={i === 0 ? "true" : "false"}
+              >
+                <button
+                  type="button"
+                  class="showcase-pill flex items-center gap-3 px-4 py-2 w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
+                  id={`showcase-pill-${m.id}`}
+                  aria-expanded={i === 0 ? "true" : "false"}
+                  aria-controls={`showcase-panel-${m.id}`}
+                  aria-label={name}
+                  data-index={i}
+                >
+                  <span
+                    class="showcase-plus flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-ink/10 text-brand-ink text-sm font-bold leading-none
+                           transition-all duration-300 motion-reduce:transition-none
+                           group-data-[active=true]:opacity-0 group-data-[active=true]:w-0 group-data-[active=true]:scale-0"
+                    aria-hidden="true"
+                  >
+                    +
+                  </span>
+                  <span class={logoBoxClass}>
+                    <Image src={m.logo} alt="" class="max-h-full max-w-full object-contain" widths={[120, 180]} sizes="120px" />
+                  </span>
+                </button>
+
+                <div
+                  id={`showcase-panel-${m.id}`}
+                  role="region"
+                  aria-labelledby={`showcase-pill-${m.id}`}
+                  aria-hidden={i === 0 ? "false" : "true"}
+                  class="grid grid-rows-[0fr] group-data-[active=true]:grid-rows-[1fr]
+                         transition-[grid-template-rows] duration-500 ease-out motion-reduce:transition-none"
+                >
+                  <div class="overflow-hidden">
+                    <div class="px-4 pb-5 pt-2 text-left">
+                      <p class="font-serif italic text-brand-ink/70 mb-2">{tagline}</p>
+                      <p class="font-sans text-brand-ink/80 leading-relaxed text-sm" set:html={withBold(description)} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLElement>('.ministries-showcase').forEach((root) => {
+      const items = Array.from(root.querySelectorAll<HTMLElement>('.showcase-item'));
+      const photos = Array.from(root.querySelectorAll<HTMLElement>('.showcase-photo'));
+      const prevBtn = root.querySelector<HTMLButtonElement>('.showcase-nav-prev');
+      const nextBtn = root.querySelector<HTMLButtonElement>('.showcase-nav-next');
+      const total = items.length;
+      if (total === 0) return;
+
+      let activeIndex = items.findIndex((el) => el.dataset.active === 'true');
+      if (activeIndex === -1) activeIndex = 0;
+
+      function setActive(item: HTMLElement, active: boolean) {
+        item.dataset.active = active ? 'true' : 'false';
+        const pill = item.querySelector<HTMLButtonElement>('.showcase-pill');
+        const panel = item.querySelector<HTMLElement>('[role="region"]');
+        pill?.setAttribute('aria-expanded', active ? 'true' : 'false');
+        panel?.setAttribute('aria-hidden', active ? 'false' : 'true');
+      }
+
+      function activate(index: number, focusPill = false) {
+        const next = ((index % total) + total) % total;
+        if (next === activeIndex) return;
+
+        setActive(items[activeIndex], false);
+        photos[activeIndex].dataset.active = 'false';
+
+        activeIndex = next;
+        setActive(items[activeIndex], true);
+        photos[activeIndex].dataset.active = 'true';
+
+        if (focusPill) {
+          items[activeIndex].querySelector<HTMLButtonElement>('.showcase-pill')?.focus();
+        }
+      }
+
+      items.forEach((item, i) => {
+        const pill = item.querySelector<HTMLButtonElement>('.showcase-pill');
+        pill?.addEventListener('click', () => activate(i));
+        pill?.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activate(i + 1, true);
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activate(i - 1, true);
+          }
+        });
+      });
+
+      prevBtn?.addEventListener('click', () => activate(activeIndex - 1, true));
+      nextBtn?.addEventListener('click', () => activate(activeIndex + 1, true));
+    });
+  });
+</script>

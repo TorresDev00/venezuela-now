@@ -61,6 +61,17 @@ export const ui = {
     "stories.viewAll": "View all →",
     "stories.readMore": "Read more →",
 
+    "organizations.heading": "One mission, six ministries",
+    "organizations.subtitle":
+      "Venezuela Now carries out its work through a network of foundations and programs, each reaching a different part of the country's needs.",
+    "organizations.linkMore": "Learn more",
+
+    "showcase.heading": "One mission, six ministries",
+    "showcase.subtitle":
+      "Explore how Venezuela Now carries out its work — from theological training to medical care on the ground.",
+    "showcase.prevAria": "Previous ministry",
+    "showcase.nextAria": "Next ministry",
+
     "about.eyebrow": "Who we are",
     "about.titlePre": "Real help, driven by",
     "about.titleHighlight": "faith.",
@@ -143,6 +154,17 @@ export const ui = {
     "stories.subtitle": "Lo que está pasando en el terreno.",
     "stories.viewAll": "Ver todas →",
     "stories.readMore": "Leer más →",
+
+    "organizations.heading": "Una misión, seis ministerios",
+    "organizations.subtitle":
+      "Venezuela Now realiza su trabajo a través de una red de fundaciones y programas, cada uno enfocado en una necesidad distinta del país.",
+    "organizations.linkMore": "Conocer más",
+
+    "showcase.heading": "Una misión, seis ministerios",
+    "showcase.subtitle":
+      "Descubre cómo Venezuela Now lleva a cabo su trabajo — desde la formación teológica hasta la atención médica en el terreno.",
+    "showcase.prevAria": "Ministerio anterior",
+    "showcase.nextAria": "Ministerio siguiente",
 
     "about.eyebrow": "Quiénes somos",
     "about.titlePre": "Ayuda real, impulsada por",

@@ -1,12 +1,14 @@
 ---
-import Layout      from '../layouts/Layout.astro';
-import Header      from './Header.astro';
-import Hero        from './Hero.astro';
-import StatCard    from './StatCard.astro';
-import StoryGrid   from './StoryGrid.astro';
-import AboutImpact from './Aboutimpact.astro';
-import CtaBand     from './CtaBand.astro';
-import Footer      from './Footer.astro';
+import Layout             from '../layouts/Layout.astro';
+import Header             from './Header.astro';
+import Hero               from './Hero.astro';
+import StatCard           from './StatCard.astro';
+import StoryGrid          from './StoryGrid.astro';
+import AboutImpact        from './Aboutimpact.astro';
+// import OrganizationsGrid  from './OrganizationsGrid.astro'; // grid estático — conservado como alternativa, ver MinistriesShowcase
+import MinistriesShowcase from './MinistriesShowcase.astro';
+import CtaBand            from './CtaBand.astro';
+import Footer             from './Footer.astro';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 
 const lang = getLangFromUrl(Astro.url);
@@ -70,8 +72,10 @@ const stats = [
       </div>
     </section>
 
-    <StoryGrid />
     <AboutImpact />
+    {/* <OrganizationsGrid /> — versión grid estática, conservada como alternativa */}
+    <MinistriesShowcase />
+    <StoryGrid />
     <CtaBand />
   </main>
 

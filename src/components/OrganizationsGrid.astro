@@ -1,0 +1,137 @@
+---
+import { Image } from "astro:assets";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import SemwesvenLogo         from "../assets/img/logos/Seminario Wesleyano.webp";
+import PanoramaLogo          from "../assets/img/logos/Panorama.webp";
+import GrowSchoolLogo        from "../assets/img/logos/Grow School.webp";
+import IliLogo               from "../assets/img/logos/ILI.webp";
+import WesleyLogo            from "../assets/img/logos/Centro Wesley.webp";
+import IglesiaMetodistaLogo  from "../assets/img/logos/Iglesia Metodista.webp";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// `href` queda documentado para cuando el cliente confirme el contenido de
+// cada ministerio — hoy ningún link apunta ahí (ver nota en el <a> de abajo).
+// `logo: null` se deja como fallback intencional (ver render abajo) por si
+// se agrega un séptimo ministerio antes de tener su logo listo.
+const organizations = [
+  {
+    name: "SEMWESVEN",
+    fullName_en: "Wesleyan Seminary of Venezuela",
+    fullName_es: "Seminario Wesleyano de Venezuela",
+    tagline_en: "Prepared minds, burning hearts",
+    tagline_es: "Mente preparada, corazón ardiente",
+    logo: SemwesvenLogo,
+    href: "/ministries/semwesven",
+  },
+  {
+    name: "Panorama",
+    fullName_en: "Panorama",
+    fullName_es: "Panorama",
+    tagline_en: "First aid for pastors and leaders",
+    tagline_es: "Primeros auxilios para pastores y líderes",
+    logo: PanoramaLogo,
+    href: "/ministries/panorama",
+  },
+  {
+    // Nombre oficial en inglés confirmado por el cliente: "Grow School"
+    // (no es traducción literal de "Zonas Crecer").
+    name: "Grow School",
+    fullName_en: "Grow School",
+    fullName_es: "Zonas Crecer",
+    tagline_en: "Raising an extraordinary generation",
+    tagline_es: "Formamos una generación extraordinaria",
+    logo: GrowSchoolLogo,
+    href: "/ministries/zonas-crecer",
+  },
+  {
+    name: "ILI",
+    fullName_en: "International Leadership Institute",
+    fullName_es: "Instituto de Liderazgo Internacional",
+    tagline_en: "Training leaders, spreading the gospel",
+    tagline_es: "Capacitar líderes, propagar el evangelio",
+    logo: IliLogo,
+    href: "/ministries/ili",
+  },
+  {
+    name: "Wesley Medical Center",
+    fullName_en: "Wesley Medical Center",
+    fullName_es: "Centro Médico Wesley",
+    tagline_en: "Comprehensive care with excellence",
+    tagline_es: "Salud integral con excelencia",
+    logo: WesleyLogo,
+    href: "/ministries/wesley-medical",
+  },
+  {
+    name: "Global Methodist Church Venezuela",
+    fullName_en: "Global Methodist Church of Venezuela",
+    fullName_es: "Iglesia Metodista de Venezuela",
+    tagline_en: "Restored families reaching nations for Christ",
+    tagline_es: "Familias restauradas alcanzando naciones para Cristo",
+    logo: IglesiaMetodistaLogo,
+    href: "/ministries/iglesia-metodista",
+  },
+];
+
+// Iniciales cortas para el placeholder circular cuando no hay logo real.
+// Nombres de una sola palabra (siglas como "SEMWESVEN" o "ILI") se
+// recortan a 3 letras; nombres de varias palabras usan la inicial de cada una.
+function initials(name: string): string {
+  const words = name.split(" ").filter(Boolean);
+  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
+  return words.map((w) => w[0]).join("").slice(0, 3).toUpperCase();
+}
+---
+
+<section id="ministerios" class="py-24 bg-surface" aria-labelledby="organizations-heading">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <div class="max-w-2xl mb-16 reveal">
+      <h2 id="organizations-heading" class="font-display text-4xl sm:text-5xl font-black text-brand-ink mb-4">
+        {t("organizations.heading")}
+      </h2>
+      <p class="text-base sm:text-lg text-slate-500 max-w-xl leading-relaxed">
+        {t("organizations.subtitle")}
+      </p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+      {organizations.map((org, i) => {
+        const fullName = lang === "es" ? org.fullName_es : org.fullName_en;
+        const tagline = lang === "es" ? org.tagline_es : org.tagline_en;
+        return (
+          <article class="glass-light rounded-3xl p-8 flex flex-col items-center text-center h-full reveal" style={`transition-delay: ${(i % 3) * 0.08}s`}>
+            <div class="h-20 w-full mb-4 flex items-center justify-center">
+              {org.logo ? (
+                <Image
+                  src={org.logo}
+                  alt={fullName}
+                  class="max-h-full max-w-[85%] w-auto h-auto object-contain"
+                  widths={[160, 240]}
+                  sizes="160px"
+                />
+              ) : (
+                <div
+                  class="h-16 w-16 rounded-full bg-brand-blue flex items-center justify-center text-white font-display font-black text-lg"
+                  aria-hidden="true"
+                >
+                  {initials(org.name)}
+                </div>
+              )}
+            </div>
+            <h3 class="text-lg font-bold text-brand-ink mb-1">{fullName}</h3>
+            <p class="font-serif italic text-slate-500 text-sm mb-5">{tagline}</p>
+            {/* TODO: apuntar a la página de detalle del ministerio cuando el cliente confirme el contenido */}
+            <a
+              href="javascript:void(0)"
+              class="mt-auto pt-4 text-sm font-semibold text-brand-blue hover:text-brand-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
+            >
+              {t("organizations.linkMore")} →
+            </a>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</section>
