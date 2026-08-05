@@ -182,7 +182,7 @@ function withBold(text: string): string {
         <div class="hidden lg:flex flex-col gap-2 self-center shrink-0">
           <button
             type="button"
-            class="showcase-nav-prev h-10 w-10 rounded-full bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
+            class="showcase-nav-prev h-10 w-10 rounded-full bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow cursor-pointer"
             aria-label={t("showcase.prevAria")}
           >
             <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -191,7 +191,7 @@ function withBold(text: string): string {
           </button>
           <button
             type="button"
-            class="showcase-nav-next h-10 w-10 rounded-full bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
+            class="showcase-nav-next h-10 w-10 rounded-full bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow cursor-pointer"
             aria-label={t("showcase.nextAria")}
           >
             <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -219,7 +219,7 @@ function withBold(text: string): string {
               >
                 <button
                   type="button"
-                  class="showcase-pill flex items-center px-4 py-2 w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
+                  class="showcase-pill flex items-center px-4 py-2 w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow cursor-pointer"
                   id={`showcase-pill-${m.id}`}
                   aria-expanded={i === 0 ? "true" : "false"}
                   aria-controls={`showcase-panel-${m.id}`}
