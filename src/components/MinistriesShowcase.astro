@@ -2,12 +2,12 @@
 import { Image } from "astro:assets";
 import { getLangFromUrl, useTranslations } from "../i18n/utils";
 
-import SemwesvenLogo        from "../assets/img/logos/Seminario Wesleyano.webp";
+import SemwesvenLogo        from "../assets/img/logos/Seminario_Wesleyano_white.webp";
 import PanoramaLogo         from "../assets/img/logos/Panorama.webp";
-import GrowSchoolLogo       from "../assets/img/logos/Grow School.webp";
-import IliLogo              from "../assets/img/logos/ILI.webp";
-import WesleyLogo           from "../assets/img/logos/Centro Wesley.webp";
-import IglesiaMetodistaLogo from "../assets/img/logos/Iglesia Metodista.webp";
+import GrowSchoolLogo       from "../assets/img/logos/Grow_School.webp";
+import IliLogo              from "../assets/img/logos/ILI_white.webp";
+import WesleyLogo           from "../assets/img/logos/Centro_Wesley.webp";
+import IglesiaMetodistaLogo from "../assets/img/logos/Iglesia_Metodista_white.webp";
 
 // Nota: el archivo de la foto de Grow School tiene un typo en disco
 // ("Shool"), se usa tal cual está guardado — el nombre mostrado al usuario
@@ -129,7 +129,7 @@ const logoBoxClass =
 // Apple. set:html es seguro aquí: el texto lo autoramos nosotros, no viene
 // de input de usuario.
 function withBold(text: string): string {
-  return text.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-brand-ink">$1</strong>');
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
 }
 ---
 
@@ -211,17 +211,15 @@ function withBold(text: string): string {
                 class="showcase-item group relative flex flex-col overflow-hidden
                        w-full lg:w-56 lg:data-[active=true]:w-full lg:data-[active=true]:max-w-md
                        rounded-[28px] data-[active=true]:rounded-[20px]
-                       bg-white/50 data-[active=true]:bg-white/60
-                       backdrop-blur-md data-[active=true]:backdrop-blur-lg
-                       border border-white/40 shadow-[0_4px_16px_rgba(0,0,0,0.2)]
-                       transition-all duration-500 ease-out motion-reduce:transition-none
+                       glass
+                       transition-all duration-[700ms] ease-in-out motion-reduce:transition-none
                        hover:scale-[1.02] data-[active=true]:hover:scale-100"
                 data-index={i}
                 data-active={i === 0 ? "true" : "false"}
               >
                 <button
                   type="button"
-                  class="showcase-pill flex items-center gap-3 px-4 py-2 w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
+                  class="showcase-pill flex items-center px-4 py-2 w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
                   id={`showcase-pill-${m.id}`}
                   aria-expanded={i === 0 ? "true" : "false"}
                   aria-controls={`showcase-panel-${m.id}`}
@@ -229,15 +227,15 @@ function withBold(text: string): string {
                   data-index={i}
                 >
                   <span
-                    class="showcase-plus flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-ink/10 text-brand-ink text-sm font-bold leading-none
+                    class="showcase-plus flex h-6 w-6 shrink-0 items-center justify-center mr-3 text-white text-sm font-bold leading-none
                            transition-all duration-300 motion-reduce:transition-none
-                           group-data-[active=true]:opacity-0 group-data-[active=true]:w-0 group-data-[active=true]:scale-0"
+                           group-data-[active=true]:opacity-0 group-data-[active=true]:w-0 group-data-[active=true]:scale-0 group-data-[active=true]:mr-0"
                     aria-hidden="true"
                   >
                     +
                   </span>
                   <span class={logoBoxClass}>
-                    <Image src={m.logo} alt="" class="max-h-full max-w-full object-contain" widths={[120, 180]} sizes="120px" />
+                    <Image src={m.logo} alt="" class="max-h-full max-w-full object-contain" widths={[120, 180]} sizes="180px" />
                   </span>
                 </button>
 
@@ -247,12 +245,12 @@ function withBold(text: string): string {
                   aria-labelledby={`showcase-pill-${m.id}`}
                   aria-hidden={i === 0 ? "false" : "true"}
                   class="grid grid-rows-[0fr] group-data-[active=true]:grid-rows-[1fr]
-                         transition-[grid-template-rows] duration-500 ease-out motion-reduce:transition-none"
+                         transition-[grid-template-rows] duration-[700ms] ease-in-out motion-reduce:transition-none"
                 >
                   <div class="overflow-hidden">
-                    <div class="px-4 pb-5 pt-2 text-left">
-                      <p class="font-serif italic text-brand-ink/70 mb-2">{tagline}</p>
-                      <p class="font-sans text-brand-ink/80 leading-relaxed text-sm" set:html={withBold(description)} />
+                    <div class="px-4 pb-5 pt-2 text-left lg:w-[26rem]">
+                      <p class="font-serif italic text-white/80 mb-2">{tagline}</p>
+                      <p class="font-sans text-white/80 leading-relaxed text-sm" set:html={withBold(description)} />
                     </div>
                   </div>
                 </div>
