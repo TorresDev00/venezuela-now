@@ -37,7 +37,6 @@ export const ui = {
     "nav.langLabel": "Language",
 
     "hero.sectionAria": "Homepage banner",
-    "hero.imageAlt": "Buildings damaged by the earthquake in Venezuela",
     "hero.title": "Help survivors of the Venezuela earthquakes",
     "hero.subtitle":
       "Thousands of Venezuelan families have lost everything. Your support brings food, shelter, and hope today.",
@@ -45,6 +44,9 @@ export const ui = {
     "hero.ctaSecondary": "Learn about the crisis",
     "hero.trustBadge": "Secure · Processed by Stripe · Tax-deductible",
     "hero.scrollHint": "Learn more",
+    "hero.urgencyBadge": "Active emergency response",
+    "hero.newsLabel": "Latest from the ground",
+    "hero.newsDotAria": "View update:",
 
     "situation.heading": "The crisis in Venezuela",
     "situation.body":
@@ -131,7 +133,6 @@ export const ui = {
     "nav.langLabel": "Idioma",
 
     "hero.sectionAria": "Portada",
-    "hero.imageAlt": "Edificios afectados por el terremoto en Venezuela",
     "hero.title": "Ayuda a los sobrevivientes de los terremotos en Venezuela",
     "hero.subtitle":
       "Miles de familias venezolanas lo han perdido todo. Tu apoyo les da comida, refugio y esperanza hoy.",
@@ -139,6 +140,9 @@ export const ui = {
     "hero.ctaSecondary": "Conocer la situación",
     "hero.trustBadge": "Seguro · Procesado por Stripe · Deducible de impuestos",
     "hero.scrollHint": "Conocer más",
+    "hero.urgencyBadge": "Respuesta de emergencia activa",
+    "hero.newsLabel": "Últimas noticias del terreno",
+    "hero.newsDotAria": "Ver actualización:",
 
     "situation.heading": "La situación en Venezuela",
     "situation.body":
