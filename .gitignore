@@ -15,7 +15,12 @@ pnpm-debug.log*
 
 # environment variables
 .env
-.env.production
+.env.*
+
+# playwright mcp cache / debug output
+.playwright-mcp/
+debug-videos/
+debug-frames/
 
 # macOS-specific files
 .DS_Store
