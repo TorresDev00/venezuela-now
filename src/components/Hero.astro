@@ -25,14 +25,14 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
   .slice(0, 3);
 ---
 
-<section class="relative h-screen overflow-hidden" aria-label={t("hero.sectionAria")}>
+<section class="hero relative h-screen overflow-hidden" aria-label={t("hero.sectionAria")}>
   <!-- Capa 1: fotos, una por noticia. Crossfade por opacidad — mismo patrón
        verificado en MinistriesShowcase (todas precargadas de antemano,
        opacidad 0/100 según cuál está activa, loading eager solo en la primera). -->
-  <div class="absolute inset-0 bg-brand-ink" aria-hidden="true">
+  <div class="absolute inset-0 surface-dark" aria-hidden="true">
     {news.map((story, i) => (
       <div
-        class="hero-photo absolute inset-0 opacity-0 scale-105 transition-[opacity,transform] duration-900 ease-out motion-reduce:transition-none data-[active=true]:opacity-100 data-[active=true]:scale-100"
+        class="hero-photo absolute inset-0 opacity-0 scale-105 transition-[opacity,transform] duration-(--hero-transition) ease-out motion-reduce:transition-none data-[active=true]:opacity-100 data-[active=true]:scale-100"
         data-index={i}
         data-active={i === 0 ? "true" : "false"}
       >
@@ -51,6 +51,11 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
 
   <!-- Overlay estándar para legibilidad con foto real -->
   <div class="absolute inset-0 photo-overlay-strong pointer-events-none" aria-hidden="true"></div>
+
+  <!-- Scrim de amortiguación: se oscurece brevemente a mitad de cada crossfade
+       para disimular el salto de brillo entre fotos con luminosidad distinta
+       (ver PARTE B del brief) — no reemplaza el overlay de arriba, se suma. -->
+  <div class="hero-scrim-pulse absolute inset-0 bg-brand-ink opacity-0 pointer-events-none" aria-hidden="true"></div>
 
   <!-- Contenido -->
   <div class="relative z-10 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10 lg:pb-14 pt-24 lg:pt-28 flex flex-col justify-end lg:justify-between gap-8">
@@ -117,7 +122,7 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
         {news.map((story, i) => (
           <a
             href={`${translatePath("news")}/${slugFor(story.id)}`}
-            class="hero-news-item absolute inset-0 flex flex-col justify-center gap-1 opacity-0 translate-y-2 pointer-events-none transition-[opacity,transform] duration-900 ease-out motion-reduce:transition-none motion-reduce:translate-y-0 data-[active=true]:opacity-100 data-[active=true]:translate-y-0 data-[active=true]:pointer-events-auto rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
+            class="hero-news-item absolute inset-0 flex flex-col justify-center gap-1 opacity-0 translate-y-2 pointer-events-none transition-[opacity,transform] duration-(--hero-transition) ease-out motion-reduce:transition-none motion-reduce:translate-y-0 data-[active=true]:opacity-100 data-[active=true]:translate-y-0 data-[active=true]:pointer-events-auto rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
             data-index={i}
             data-active={i === 0 ? "true" : "false"}
             aria-hidden={i === 0 ? "false" : "true"}
@@ -164,6 +169,13 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
 </section>
 
 <style>
+  /* Fuente única de la duración del crossfade (foto + texto de noticia
+     comparten esta variable, ver PARTE B del brief). Para depurar en cámara
+     lenta, cambiar temporalmente este valor a algo como 3000ms. */
+  .hero {
+    --hero-transition: 1300ms;
+  }
+
   @keyframes hero-news-progress {
     from { width: 0%; }
     to { width: 100%; }
@@ -179,6 +191,21 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
   .hero-news:focus-within .hero-news-dot-fill {
     animation-play-state: paused;
   }
+
+  /* Amortigua el salto de brillo entre fotos de luminosidad distinta:
+     oscurece el scrim a mitad del crossfade y vuelve a su opacidad normal. */
+  @keyframes hero-scrim-pulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.45; }
+  }
+  .hero-scrim-pulse.is-pulsing {
+    animation: hero-scrim-pulse var(--hero-transition) ease-in-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-scrim-pulse.is-pulsing {
+      animation: none;
+    }
+  }
 </style>
 
 <script>
@@ -188,6 +215,7 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
       const photos = Array.from(section?.querySelectorAll<HTMLElement>(".hero-photo") ?? []);
       const textItems = Array.from(root.querySelectorAll<HTMLElement>(".hero-news-item"));
       const dots = Array.from(root.querySelectorAll<HTMLButtonElement>(".hero-news-dot"));
+      const scrimPulse = section?.querySelector<HTMLElement>(".hero-scrim-pulse");
       const total = dots.length;
       if (total === 0) return;
 
@@ -222,12 +250,20 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
         fill.style.animation = "";
       }
 
+      function pulseScrim() {
+        if (!scrimPulse) return;
+        scrimPulse.classList.remove("is-pulsing");
+        void scrimPulse.offsetWidth;
+        scrimPulse.classList.add("is-pulsing");
+      }
+
       function activate(index: number) {
         const next = ((index % total) + total) % total;
         if (next === activeIndex) {
           restartFill(next);
           return;
         }
+        pulseScrim();
         setActive(activeIndex, false);
         activeIndex = next;
         setActive(activeIndex, true);

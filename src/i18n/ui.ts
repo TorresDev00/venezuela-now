@@ -55,8 +55,13 @@ export const ui = {
     "situation.stat1Desc": "Venezuelans directly affected by the 2024 earthquakes.",
     "situation.stat2Label": "Families displaced",
     "situation.stat2Desc": "Homes completely destroyed that need urgent help.",
-    "situation.stat3Label": "Communities reached",
-    "situation.stat3Desc": "Communities we've already brought humanitarian aid to.",
+    "situation.stat3Label": "Lives lost",
+    "situation.stat3Desc":
+      "Venezuelan lives lost in the earthquakes — each one a family left searching for hope.",
+
+    "response.heading": "Our response, in numbers",
+    "response.intro":
+      "In the weeks since the earthquakes, Venezuela Now's ministries have responded together — bringing school supplies and play back to children through Grow School, medical care through mobile clinics with Wesley Medical Center, spiritual companionship through the Seminary, food and hygiene essentials through our missions teams, and the presence of the Global Methodist Church in the hardest-hit communities. This is what your support has already made possible.",
 
     "stories.heading": "Stories and news",
     "stories.subtitle": "What's happening on the ground.",
@@ -151,8 +156,13 @@ export const ui = {
     "situation.stat1Desc": "Venezolanos impactados directamente por los sismos de 2024.",
     "situation.stat2Label": "Familias sin hogar",
     "situation.stat2Desc": "Hogares completamente destruidos que requieren ayuda urgente.",
-    "situation.stat3Label": "Comunidades alcanzadas",
-    "situation.stat3Desc": "Comunidades a las que ya llevamos ayuda humanitaria.",
+    "situation.stat3Label": "Vidas perdidas",
+    "situation.stat3Desc":
+      "Vidas venezolanas perdidas en los sismos — cada una, una familia que busca esperanza.",
+
+    "response.heading": "Nuestra respuesta, en cifras",
+    "response.intro":
+      "En las semanas desde los terremotos, los ministerios de Venezuela Now han respondido juntos — llevando útiles escolares y alegría a los niños a través de Zonas Crecer, atención médica mediante clínicas móviles con el Centro Médico Wesley, acompañamiento espiritual a través del Seminario, alimentos e higiene esencial mediante nuestros equipos de misiones, y la presencia de la Iglesia Metodista Global en las comunidades más golpeadas. Esto es lo que tu apoyo ya hizo posible.",
 
     "stories.heading": "Historias y noticias",
     "stories.subtitle": "Lo que está pasando en el terreno.",

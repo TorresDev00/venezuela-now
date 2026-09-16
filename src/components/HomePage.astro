@@ -5,6 +5,7 @@ import Hero               from './Hero.astro';
 import StatCard           from './StatCard.astro';
 import StoryGrid          from './StoryGrid.astro';
 import AboutImpact        from './Aboutimpact.astro';
+import ResponseCards      from './ResponseCards.astro';
 // import OrganizationsGrid  from './OrganizationsGrid.astro'; // grid estático — conservado como alternativa, ver MinistriesShowcase
 import MinistriesShowcase from './MinistriesShowcase.astro';
 import CtaBand            from './CtaBand.astro';
@@ -17,21 +18,21 @@ const t = useTranslations(lang);
 const stats = [
   {
     // TODO: reemplazar por cifra confirmada por el cliente
-    number: "45,000+",
+    number: "100,000+",
     label: t("situation.stat1Label"),
     description: t("situation.stat1Desc"),
     accent: "crimson" as const,
   },
   {
     // TODO: reemplazar por cifra confirmada por el cliente
-    number: "8,200+",
+    number: "20,000+",
     label: t("situation.stat2Label"),
     description: t("situation.stat2Desc"),
     accent: "blue" as const,
   },
   {
-    // TODO: reemplazar por cifra confirmada por el cliente
-    number: "34",
+    // TODO: confirmar cifra real con el cliente
+    number: "6,500+",
     label: t("situation.stat3Label"),
     description: t("situation.stat3Desc"),
     accent: "yellow" as const,
@@ -71,6 +72,8 @@ const stats = [
         </div>
       </div>
     </section>
+
+    <ResponseCards />
 
     <AboutImpact />
     {/* <OrganizationsGrid /> — versión grid estática, conservada como alternativa */}

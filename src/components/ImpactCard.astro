@@ -1,0 +1,624 @@
+---
+/**
+ * ImpactCard
+ * Tarjeta con icono + título. Al pulsar el botón (+ → X) una onda circular
+ * nace desde el botón, cubre la tarjeta y revela la cifra, que cuenta desde
+ * 0 hasta su valor real, junto a la cita del ministerio.
+ *
+ * El icono se pasa por <slot /> (igual que en las tarjetas de AboutImpact).
+ */
+interface Props {
+  title: string;
+  /** Cada línea. Si empieza con una cifra ("3,000+", "~500", "4") se destaca y se anima. */
+  items: string[];
+  /** Frase final en cursiva (opcional). */
+  quote?: string;
+  /** Cifra que se ve en la cara frontal. Por defecto: la primera cifra de `items`. */
+  stat?: string;
+  statLabel?: string;
+  class?: string;
+}
+
+const { title, items, quote, stat, statLabel, class: className } = Astro.props;
+
+type Parsed =
+  | { kind: "number"; prefix: string; raw: string; value: number; decimals: number; suffix: string; label: string }
+  | { kind: "text"; label: string };
+
+const parse = (line: string): Parsed => {
+  const m = line.trim().match(/^([~≈]?)(\d[\d,]*(?:\.\d+)?)(\+?)\s+(.+)$/);
+  if (!m) return { kind: "text", label: line };
+  const [, prefix, raw, suffix, label] = m;
+  return {
+    kind: "number",
+    prefix,
+    raw,
+    value: Number(raw.replace(/,/g, "")),
+    decimals: raw.includes(".") ? raw.split(".")[1].length : 0,
+    suffix,
+    label,
+  };
+};
+
+const parsed = items.map(parse);
+const firstNumber = parsed.find((p) => p.kind === "number");
+const frontStat = stat ?? (firstNumber?.kind === "number" ? `${firstNumber.prefix}${firstNumber.raw}${firstNumber.suffix}` : undefined);
+const frontStatLabel = statLabel ?? (firstNumber?.kind === "number" && !stat ? firstNumber.label : undefined);
+
+// El slot se renderiza una vez y se reutiliza (insignia + marca de agua)
+const icon = Astro.slots.has("default") ? await Astro.slots.render("default") : "";
+
+const uid = `ic-${Math.random().toString(36).slice(2, 9)}`;
+const REVEAL_BASE = 280; // ms, debe coincidir con el CSS
+const REVEAL_STEP = 70;
+---
+
+<article
+  class:list={["impact-card", className]}
+  data-ic-card
+>
+  <!-- Cara frontal -->
+  <div class="impact-card__front" data-ic-front>
+    <span class="impact-card__ghost" aria-hidden="true"><Fragment set:html={icon} /></span>
+
+    <span class="impact-card__badge" aria-hidden="true"><Fragment set:html={icon} /></span>
+
+    <div class="impact-card__bottom">
+      {
+        frontStat && (
+          <p class="impact-card__stat">
+            <span class="impact-card__stat-value">{frontStat}</span>
+            {frontStatLabel && <span class="impact-card__stat-label">{frontStatLabel}</span>}
+          </p>
+        )
+      }
+      <h3 class="impact-card__title" id={`${uid}-title`}>{title}</h3>
+    </div>
+  </div>
+
+  <!-- Panel que se revela -->
+  <div
+    class="impact-card__panel"
+    id={`${uid}-panel`}
+    role="region"
+    aria-labelledby={`${uid}-title`}
+    aria-hidden="true"
+    data-ic-panel
+    inert
+  >
+    <span class="impact-card__ghost impact-card__ghost--panel" aria-hidden="true"><Fragment set:html={icon} /></span>
+
+    <div class="impact-card__panel-inner" data-ic-scroll>
+      <p class="impact-card__panel-title" data-reveal style="--i: 0">{title}</p>
+
+      <ul class="impact-card__list">
+        {
+          parsed.map((item, i) => (
+            <li class="impact-card__item" data-reveal style={`--i: ${i + 1}`}>
+              {item.kind === "number" ? (
+                <>
+                  <span
+                    class="impact-card__num"
+                    data-ic-count
+                    data-target={item.value}
+                    data-decimals={item.decimals}
+                    data-prefix={item.prefix}
+                    data-suffix={item.suffix}
+                    data-delay={REVEAL_BASE + (i + 1) * REVEAL_STEP + 120}
+                  >
+                    {`${item.prefix}${item.raw}${item.suffix}`}
+                  </span>
+                  <span class="impact-card__label">{item.label}</span>
+                </>
+              ) : (
+                <span class="impact-card__label impact-card__label--solo">{item.label}</span>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+
+      {
+        quote && (
+          <p class="impact-card__quote" data-reveal style={`--i: ${parsed.length + 1}`}>
+            {quote}
+          </p>
+        )
+      }
+    </div>
+  </div>
+
+  <!-- Botón + / X -->
+  <button
+    type="button"
+    class="impact-card__toggle"
+    aria-expanded="false"
+    aria-controls={`${uid}-panel`}
+    aria-label={`Show details: ${title}`}
+    data-label-open={`Show details: ${title}`}
+    data-label-close={`Hide details: ${title}`}
+    data-ic-toggle
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true">
+      <path d="M12 5v14M5 12h14"></path>
+    </svg>
+  </button>
+</article>
+
+<script>
+  const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function countUp(el: HTMLElement) {
+    const target = Number(el.dataset.target);
+    if (!Number.isFinite(target)) return;
+
+    const decimals = Number(el.dataset.decimals ?? 0);
+    const prefix = el.dataset.prefix ?? "";
+    const suffix = el.dataset.suffix ?? "";
+    const render = (value: number) => {
+      el.textContent =
+        prefix +
+        value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) +
+        suffix;
+    };
+
+    cancelAnimationFrame(Number(el.dataset.raf ?? 0));
+    if (prefersReducedMotion()) return render(target);
+
+    const delay = Number(el.dataset.delay ?? 0);
+    const duration = 1200;
+    let start: number | null = null;
+    render(0);
+
+    const tick = (now: number) => {
+      start ??= now + delay;
+      const t = Math.min(Math.max((now - start) / duration, 0), 1);
+      const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t); // easeOutExpo
+      render(target * eased);
+      if (t < 1) el.dataset.raf = String(requestAnimationFrame(tick));
+    };
+    el.dataset.raf = String(requestAnimationFrame(tick));
+  }
+
+  function setOpen(card: HTMLElement, open: boolean) {
+    const toggle = card.querySelector<HTMLButtonElement>("[data-ic-toggle]");
+    const panel = card.querySelector<HTMLElement>("[data-ic-panel]");
+    const front = card.querySelector<HTMLElement>("[data-ic-front]");
+    if (!toggle || !panel || !front) return;
+
+    card.classList.toggle("is-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", (open ? toggle.dataset.labelClose : toggle.dataset.labelOpen) ?? "");
+    panel.toggleAttribute("inert", !open);
+    panel.setAttribute("aria-hidden", String(!open));
+    front.setAttribute("aria-hidden", String(open));
+
+    if (open) {
+      const scroller = panel.querySelector<HTMLElement>("[data-ic-scroll]");
+      if (scroller) scroller.scrollTop = 0;
+      panel.querySelectorAll<HTMLElement>("[data-ic-count]").forEach(countUp);
+    }
+  }
+
+  // Delegación de eventos: funciona con cualquier número de tarjetas
+  // y también con View Transitions (<ClientRouter />).
+  document.addEventListener("click", (event) => {
+    const target = event.target as Element | null;
+    const card = target?.closest<HTMLElement>("[data-ic-card]");
+    if (!card) return;
+
+    if (target?.closest("[data-ic-toggle]")) {
+      setOpen(card, !card.classList.contains("is-open"));
+      return;
+    }
+    // Atajo con ratón: clic en la cara frontal también abre
+    if (!card.classList.contains("is-open") && target?.closest("[data-ic-front]")) {
+      setOpen(card, true);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    document.querySelectorAll<HTMLElement>("[data-ic-card].is-open").forEach((card) => {
+      const hadFocus = card.contains(document.activeElement);
+      setOpen(card, false);
+      if (hadFocus) card.querySelector<HTMLButtonElement>("[data-ic-toggle]")?.focus();
+    });
+  });
+
+  // Luz que sigue al cursor (solo ratón)
+  document.addEventListener(
+    "pointermove",
+    (event) => {
+      if (event.pointerType !== "mouse") return;
+      const card = (event.target as Element | null)?.closest<HTMLElement>("[data-ic-card]");
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty("--ic-mx", `${event.clientX - rect.left}px`);
+      card.style.setProperty("--ic-my", `${event.clientY - rect.top}px`);
+    },
+    { passive: true },
+  );
+</script>
+
+<style>
+  /* Tokens tomados de la paleta del proyecto (ver src/styles/global.css):
+     brand-blue-deep es la variante atenuada reservada para fondos grandes
+     de acento, brand-ink es el texto/tinta oscura estándar del sitio. El
+     proyecto no tiene sistema de modo oscuro (sin variante `dark:` ni
+     toggle), así que esta tarjeta es de tema único, como el resto del sitio. */
+  .impact-card {
+    --ic-accent: var(--color-brand-blue-deep);
+    --ic-on-accent: #ffffff;
+    --ic-surface: #ffffff;
+    --ic-ink: var(--color-brand-ink);
+    --ic-muted: #64748b;
+    --ic-line: rgb(10 10 35 / 0.08);
+    --ic-ease: cubic-bezier(0.77, 0, 0.18, 1);
+    --ic-btn: 3.25rem;
+    --ic-btn-gap: 1.25rem;
+    --ic-origin: calc(100% - var(--ic-btn-gap) - var(--ic-btn) / 2) calc(100% - var(--ic-btn-gap) - var(--ic-btn) / 2);
+
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    height: 100%;
+    min-height: 27rem;
+    border-radius: 1.5rem;
+    background: var(--ic-surface);
+    color: var(--ic-ink);
+    border: 1px solid var(--ic-line);
+    box-shadow: 0 8px 32px rgb(10 10 35 / 0.06);
+    transition:
+      transform 0.5s var(--ic-ease),
+      border-color 0.4s ease;
+  }
+
+  /* Luz que sigue al cursor */
+  .impact-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      20rem circle at var(--ic-mx, 50%) var(--ic-my, 0%),
+      color-mix(in srgb, var(--ic-accent) 10%, transparent),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .impact-card:not(.is-open) {
+    cursor: pointer;
+  }
+
+  .impact-card:not(.is-open):hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--ic-accent) 35%, transparent);
+  }
+
+  .impact-card:hover::before {
+    opacity: 1;
+  }
+
+  /* ---------- Cara frontal ---------- */
+  .impact-card__front {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.75rem;
+    transition:
+      opacity 0.45s ease 0.3s,
+      transform 0.7s var(--ic-ease) 0.2s,
+      filter 0.45s ease 0.3s;
+  }
+
+  .is-open .impact-card__front {
+    opacity: 0;
+    transform: scale(0.9);
+    filter: blur(6px);
+    transition-delay: 0s;
+  }
+
+  .impact-card__badge {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: var(--ic-accent);
+    color: var(--ic-on-accent);
+    transition: transform 0.6s var(--ic-ease);
+  }
+
+  .impact-card__badge :global(svg) {
+    width: 1.625rem;
+    height: 1.625rem;
+  }
+
+  .impact-card:not(.is-open):hover .impact-card__badge {
+    transform: rotate(-8deg) scale(1.06);
+  }
+
+  .impact-card__ghost {
+    position: absolute;
+    top: 18%;
+    right: -3rem;
+    width: 15rem;
+    height: 15rem;
+    color: var(--ic-accent);
+    opacity: 0.06;
+    transform: rotate(-14deg);
+    transition: transform 0.9s var(--ic-ease);
+    pointer-events: none;
+  }
+
+  .impact-card__ghost :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .impact-card:not(.is-open):hover .impact-card__front .impact-card__ghost {
+    transform: rotate(0deg) scale(1.05);
+  }
+
+  .impact-card__bottom {
+    position: relative;
+    padding-right: calc(var(--ic-btn) + 0.75rem);
+  }
+
+  .impact-card__stat {
+    margin: 0 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .impact-card__stat-value {
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    color: var(--ic-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .impact-card__stat-label {
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: var(--ic-muted);
+    max-width: 22ch;
+  }
+
+  .impact-card__title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    margin: 0;
+    font-size: 1.375rem;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  /* ---------- Panel revelado ---------- */
+  .impact-card__panel {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: var(--ic-accent);
+    color: var(--ic-on-accent);
+    clip-path: circle(0px at var(--ic-origin));
+    transition: clip-path 0.55s var(--ic-ease) 0.15s;
+  }
+
+  .is-open .impact-card__panel {
+    clip-path: circle(150% at var(--ic-origin));
+    transition-duration: 0.8s;
+    transition-delay: 0s;
+  }
+
+  .impact-card__ghost--panel {
+    top: auto;
+    bottom: -3.5rem;
+    left: -3.5rem;
+    right: auto;
+    color: currentColor;
+    opacity: 0.08;
+    transform: rotate(12deg) scale(0.8);
+  }
+
+  .is-open .impact-card__ghost--panel {
+    transform: rotate(0deg) scale(1);
+    transition-delay: 0.15s;
+  }
+
+  .impact-card__panel-inner {
+    position: relative;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, currentColor 30%, transparent) transparent;
+  }
+
+  .impact-card__panel-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    margin: 0 0 1rem;
+    font-size: 1.125rem;
+    line-height: 1.2;
+    opacity: 0.75;
+  }
+
+  .impact-card__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .impact-card__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.8rem 0;
+    border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  }
+
+  .impact-card__num {
+    font-family: var(--font-display);
+    font-size: 1.875rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .impact-card__label {
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    opacity: 0.85;
+  }
+
+  .impact-card__label--solo {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    opacity: 1;
+  }
+
+  .impact-card__quote {
+    margin: auto 0 0;
+    padding-top: 1.25rem;
+    padding-right: calc(var(--ic-btn) + 0.5rem);
+    font-family: ui-serif, Georgia, serif;
+    font-style: italic;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  /* Entrada escalonada del contenido */
+  .impact-card [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .impact-card.is-open [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.5s ease,
+      transform 0.7s var(--ic-ease);
+    transition-delay: calc(280ms + var(--i, 0) * 70ms);
+  }
+
+  /* ---------- Botón + / X ---------- */
+  .impact-card__toggle {
+    position: absolute;
+    right: var(--ic-btn-gap);
+    bottom: var(--ic-btn-gap);
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: var(--ic-btn);
+    height: var(--ic-btn);
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid var(--ic-ink);
+    background: transparent;
+    color: var(--ic-ink);
+    cursor: pointer;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease,
+      border-color 0.3s ease;
+  }
+
+  .impact-card__toggle svg {
+    width: 1.375rem;
+    height: 1.375rem;
+    transition: transform 0.7s var(--ic-ease);
+  }
+
+  .impact-card__toggle:hover {
+    background: var(--ic-ink);
+    color: var(--ic-surface);
+  }
+
+  /* Anillo de foco: brand-yellow, igual que el resto de controles del sitio */
+  .impact-card__toggle:focus-visible {
+    outline: 2px solid var(--color-brand-yellow);
+    outline-offset: 3px;
+  }
+
+  /* Anillo que invita a pulsar (solo al pasar el ratón por la tarjeta) */
+  .impact-card__toggle::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    border: 2px solid var(--ic-ink);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .impact-card:not(.is-open):hover .impact-card__toggle::after {
+    animation: ic-ping 1.8s var(--ic-ease) infinite;
+  }
+
+  @keyframes ic-ping {
+    0% {
+      transform: scale(1);
+      opacity: 0.45;
+    }
+    80%,
+    100% {
+      transform: scale(1.55);
+      opacity: 0;
+    }
+  }
+
+  .is-open .impact-card__toggle {
+    border-color: var(--ic-on-accent);
+    color: var(--ic-on-accent);
+  }
+
+  .is-open .impact-card__toggle svg {
+    transform: rotate(135deg);
+  }
+
+  .is-open .impact-card__toggle:hover {
+    background: var(--ic-on-accent);
+    color: var(--ic-accent);
+  }
+
+  /* ---------- Movimiento reducido ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .impact-card,
+    .impact-card__front,
+    .impact-card__panel,
+    .impact-card__badge,
+    .impact-card__ghost,
+    .impact-card__toggle svg,
+    .impact-card [data-reveal],
+    .impact-card.is-open [data-reveal] {
+      transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
+    }
+    .impact-card:not(.is-open):hover {
+      transform: none;
+    }
+    .impact-card:not(.is-open):hover .impact-card__toggle::after {
+      animation: none;
+    }
+  }
+</style>

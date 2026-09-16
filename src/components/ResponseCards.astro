@@ -1,0 +1,143 @@
+---
+import ImpactCard from "./ImpactCard.astro";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Una cifra bandera por ministerio (redondeada, la más representativa de su
+// categoría) + una frase narrativa — evita leerse como inventario y no exige
+// mantener exactitud perfecta en cifras sueltas. Datos reales provistos por
+// el cliente (respuesta a los terremotos, 2025).
+const responses = [
+  {
+    id: "children",
+    icon: "book",
+    title_en: "Grow School — Children",
+    title_es: "Zonas Crecer — Niñez",
+    statValue_en: "3,000+",
+    statValue_es: "3,000+",
+    statLabel_en: "children reached with school supplies and care",
+    statLabel_es: "niños alcanzados con útiles escolares y cuidado",
+    context_en: "Over 400 schools were destroyed in La Guaira alone. Grow School is bringing color back to children's lives.",
+    context_es: "Más de 400 escuelas quedaron destruidas solo en La Guaira. Zonas Crecer está devolviendo color a la vida de estos niños.",
+  },
+  {
+    id: "medical",
+    icon: "medical",
+    title_en: "Wesley Medical Center",
+    title_es: "Centro Médico Wesley",
+    statValue_en: "3,000+",
+    statValue_es: "3,000+",
+    statLabel_en: "patients treated, including nutrition care for children",
+    statLabel_es: "pacientes atendidos, incluyendo apoyo nutricional infantil",
+    context_en: "A mobile hospital reaching zones with little to no medical access.",
+    context_es: "Un hospital móvil llegando a zonas con poco o ningún acceso médico.",
+  },
+  {
+    /* TODO: el cliente mencionó un video de testimonios para esta categoría.
+       Pendiente: recibir el archivo/enlace y decidir si va embebido aquí o
+       en una página de detalle del Seminario. */
+    id: "seminary",
+    icon: "heart",
+    title_en: "Seminary — Spiritual Care",
+    title_es: "Seminario — Apoyo Espiritual",
+    statValue_en: "Hundreds",
+    statValue_es: "Cientos",
+    statLabel_en: "supported through spiritual care and shared stories",
+    statLabel_es: "acompañados con apoyo espiritual e historias compartidas",
+    context_en: "The most essential work: simply being heard.",
+    context_es: "El trabajo más esencial: simplemente ser escuchados.",
+  },
+  {
+    id: "missions",
+    icon: "box",
+    title_en: "Missions — Food & Essentials",
+    title_es: "Misiones — Alimentos y Esenciales",
+    statValue_en: "4",
+    statValue_es: "4",
+    statLabel_en: "mission trips delivering food and hygiene essentials",
+    statLabel_es: "misiones entregando alimentos y esenciales de higiene",
+    context_en: "80% of La Guaira's affected population lost their livelihoods — these essentials are a lifeline.",
+    context_es: "El 80% de la población afectada en La Guaira perdió sus medios de vida — estos recursos son un salvavidas.",
+  },
+  {
+    id: "church",
+    icon: "church",
+    title_en: "Global Methodist Church",
+    title_es: "Iglesia Metodista Global",
+    statValue_en: "10,000+",
+    statValue_es: "10,000+",
+    statLabel_en: "lives reached through evangelism and outreach",
+    statLabel_es: "personas impactadas a través de evangelismo y misiones",
+    context_en: "Being the hands and feet of Jesus in the places of greatest need.",
+    context_es: "Siendo las manos y los pies de Jesús en los lugares de mayor necesidad.",
+  },
+] as const;
+
+const icons: Record<string, string> = {
+  book:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 6c-1.5-1.3-3.5-2-6-2v14c2.5 0 4.5.7 6 2 1.5-1.3 3.5-2 6-2V4c-2.5 0-4.5.7-6 2Z"/><path d="M12 6v14"/></svg>',
+  church:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v3M10.3 3.5h3.4"/><path d="M12 5.5 20 11h-2.2v10H6.2V11H4l8-5.5Z"/><path d="M9.8 21v-4.8a2.2 2.2 0 0 1 4.4 0V21"/></svg>',
+  medical:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/></svg>',
+  heart:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20.5s-7.5-4.6-9.8-9A5.3 5.3 0 0 1 12 6.2 5.3 5.3 0 0 1 21.8 11.5c-2.3 4.4-9.8 9-9.8 9Z"/></svg>',
+  box:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8.5 12 4l9 4.5-9 4.5-9-4.5Z"/><path d="M3 8.5V16l9 4.5V13"/><path d="M21 8.5V16l-9 4.5"/></svg>',
+};
+
+// Traduce cada entrada al idioma activo. El único dato disponible por
+// tarjeta es la cifra bandera + su descripción, así que se usa también como
+// `items` (una sola línea) para que el panel revelado anime esa misma cifra.
+const cards = responses.map((item) => {
+  const title = lang === "es" ? item.title_es : item.title_en;
+  const statValue = lang === "es" ? item.statValue_es : item.statValue_en;
+  const statLabel = lang === "es" ? item.statLabel_es : item.statLabel_en;
+  const quote = lang === "es" ? item.context_es : item.context_en;
+  return {
+    icon: icons[item.icon],
+    title,
+    stat: statValue,
+    statLabel,
+    items: [`${statValue} ${statLabel}`],
+    quote,
+  };
+});
+---
+
+<section id="respuesta" class="py-24 bg-slate-50" aria-labelledby="respuesta-heading">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mb-16 reveal">
+      <h2 id="respuesta-heading" class="font-display text-4xl sm:text-5xl font-black text-brand-ink mb-4">
+        {t("response.heading")}
+      </h2>
+      <p class="text-base sm:text-lg text-slate-500 max-w-xl leading-relaxed">
+        {t("response.intro")}
+      </p>
+    </div>
+
+    <!-- 6 columnas en desktop: cada tarjeta ocupa 2, y la 2ª fila (2 tarjetas) queda centrada -->
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
+      {
+        cards.map((card, i) => (
+          <div
+            class:list={["reveal", "lg:col-span-2", i === 3 && "lg:col-start-2"]}
+            style={`transition-delay: ${i * 0.1}s`}
+          >
+            <ImpactCard
+              title={card.title}
+              items={card.items}
+              quote={card.quote}
+              stat={card.stat}
+              statLabel={card.statLabel}
+            >
+              <Fragment set:html={card.icon} />
+            </ImpactCard>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
