@@ -133,7 +133,7 @@ function withBold(text: string): string {
 }
 ---
 
-<section id="ministerios-showcase" class="py-24" aria-labelledby="showcase-heading">
+<section id="ministerios-showcase" class="py-16" aria-labelledby="showcase-heading">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="max-w-2xl mb-12 reveal">
@@ -146,7 +146,7 @@ function withBold(text: string): string {
     </div>
 
     <div
-      class="ministries-showcase relative flex flex-col lg:block rounded-3xl overflow-hidden lg:min-h-[640px] reveal"
+      class="ministries-showcase relative hidden lg:block rounded-3xl overflow-hidden lg:min-h-[640px] reveal"
     >
       <!-- Capa 1: fotografías (las 6 precargadas, crossfade por opacidad) -->
       <div class="relative w-full h-56 sm:h-72 lg:h-full lg:absolute lg:inset-0" aria-hidden="true">
@@ -261,7 +261,260 @@ function withBold(text: string): string {
       </div>
     </div>
   </div>
+
+  <!-- Mobile (<lg): cada pill "crece en su lugar" hasta volverse tarjeta al
+       tocarlo — mismo mecanismo que el accordion desktop (ancho +
+       grid-template-rows 0fr→1fr), solo que la fila es horizontal y en
+       reposo ningún ministerio está activo (a diferencia de desktop, que
+       siempre tiene uno abierto). No es un modal: no hay overlay de pantalla
+       completa ni elementos `fixed` al viewport — todo vive `absolute`
+       dentro de la foto, así el header nunca queda tapado. Vive fuera del
+       contenedor max-w-7xl para ser full-bleed. El bloque desktop de arriba
+       (`hidden lg:block`) no se toca. -->
+  <div
+    class="ministries-showcase-mobile lg:hidden relative mt-8 h-dvh overflow-hidden"
+    data-showcase-mobile
+  >
+    <!-- Fotos: las 6 precargadas, crossfade por opacidad (mismo patrón que Hero/desktop) -->
+    <div class="absolute inset-0" aria-hidden="true">
+      {ministries.map((m, i) => (
+        <div
+          class="showcase-mobile-photo absolute inset-0 opacity-0 transition-opacity duration-500 ease-out motion-reduce:transition-none data-[active=true]:opacity-100"
+          data-index={i}
+          data-active={i === 0 ? "true" : "false"}
+        >
+          <Image
+            src={m.photo}
+            alt={lang === "es" ? m.photoAlt_es : m.photoAlt_en}
+            class="w-full h-full object-cover"
+            widths={[480, 768, 1000]}
+            sizes="100vw"
+            loading={i === 0 ? "eager" : "lazy"}
+          />
+        </div>
+      ))}
+    </div>
+
+    <!-- Degradado inferior: legibilidad de pills, sin tapar la foto -->
+    <div
+      class="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Fila de pills: cada uno es su propia tarjeta que crece en su lugar -->
+    <div data-row class="showcase-mobile-row absolute inset-x-0 bottom-4 flex items-end overflow-x-auto px-4" data-expanded="false">
+      {ministries.map((m, i) => {
+        const name = lang === "es" ? m.name_es : m.name_en;
+        const tagline = lang === "es" ? m.tagline_es : m.tagline_en;
+        const description = lang === "es" ? m.description_es : m.description_en;
+        const pillId = `showcase-mobile-pill-${m.id}`;
+        const panelId = `showcase-mobile-panel-${m.id}`;
+        return (
+          <div class="showcase-mobile-item group relative flex flex-col glass" data-index={i} data-active="false">
+            <!-- Logo: tamaño fijo siempre, tanto en reposo como activo -->
+            <button
+              type="button"
+              class="showcase-pill flex items-center justify-center w-28 h-24 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow cursor-pointer"
+              id={pillId}
+              aria-expanded="false"
+              aria-controls={panelId}
+              aria-label={name}
+              data-index={i}
+            >
+              <span class="w-24 h-20 flex items-center justify-center shrink-0">
+                <Image src={m.logo} alt="" class="max-h-full max-w-full object-contain" widths={[120, 180]} sizes="180px" />
+              </span>
+            </button>
+
+            <!-- ×: dentro de la tarjeta, relativa a ella (no al viewport) -->
+            <button
+              type="button"
+              data-mobile-close
+              class="showcase-mobile-item-close absolute top-3 right-3 z-10 glass w-8 h-8 rounded-[14px] flex items-center justify-center text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow cursor-pointer"
+              aria-label={t("showcase.closeAria")}
+            >
+              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+
+            <!-- Contenido revelado: técnica grid-template-rows 0fr→1fr, igual que desktop -->
+            <div id={panelId} role="region" aria-labelledby={pillId} aria-hidden="true" class="showcase-mobile-panel-region">
+              <div class="overflow-hidden">
+                <div class="max-h-[34vh] overflow-y-auto px-6 pb-4 pt-1">
+                  <p class="font-display text-white font-bold text-xl mb-1 pr-8">{name}</p>
+                  <p class="font-serif italic text-white/70 text-sm mb-3">{tagline}</p>
+                  <p class="font-sans text-white/80 text-sm leading-relaxed" set:html={withBold(description)} />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+
+    <!-- Flechas de navegación: "cortadas" a la mitad en el borde de la
+         pantalla (mitad del círculo recortada por el overflow-hidden de la
+         sección, la otra mitad asomando hacia adentro) — intencional, no un
+         bug. A la altura aproximada del centro de la tarjeta expandida.
+         Solo visibles mientras hay una tarjeta activa (mismo control de
+         visibilidad que el botón ×). La animación al navegar es la misma
+         que ya dispara `expand()` — crossfade de foto + grid-rows —, solo
+         cambió dónde vive el botón. -->
+    <button
+      type="button"
+      data-mobile-prev
+      inert
+      class="showcase-mobile-arrow showcase-mobile-arrow--prev absolute z-10 flex items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow cursor-pointer"
+      aria-label={t("showcase.prevAria")}
+    >
+      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
+      </svg>
+    </button>
+    <button
+      type="button"
+      data-mobile-next
+      inert
+      class="showcase-mobile-arrow showcase-mobile-arrow--next absolute z-10 flex items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow cursor-pointer"
+      aria-label={t("showcase.nextAria")}
+    >
+      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
+      </svg>
+    </button>
+  </div>
 </section>
+
+<style>
+  /* Oculta la scrollbar de la fila de pills mobile en todos los navegadores. */
+  .showcase-mobile-row {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  /* `justify-content: center` SOLO cuando hay una tarjeta expandida (la
+     única pieza con ancho real en ese momento). En reposo debe quedar en
+     `flex-start` (default): el carrusel tiene 6 pills que desbordan el
+     ancho visible, y con `center` fijo Chrome centra ese overflow,
+     arrancando el scroll a mitad de camino — el pill 0 queda fuera de
+     pantalla en vez de ser el primero visible. */
+  .showcase-mobile-row[data-expanded="true"] {
+    justify-content: center;
+  }
+  .showcase-mobile-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Cada pill "crece en su lugar" hasta volverse tarjeta — mismo mecanismo
+     que el accordion desktop (ancho + grid-template-rows 0fr→1fr, ver
+     `.showcase-item`/`[role=region]` arriba), adaptado a fila horizontal.
+     CSS plano (no utilidades `data-*` de Tailwind) para tener control total
+     sobre los valores y evitar sorpresas de cascada como la que causó el
+     bug de `translate-y-*` + `group-data-*` en la versión anterior de este
+     panel (Tailwind v4 compone esas utilidades sobre una sola propiedad
+     `translate` compartida; aquí no se usa `translate` en absoluto, pero se
+     mantiene CSS plano por consistencia). El crecimiento vertical NUNCA
+     anima una `height` explícita (eso no es animable de forma fluida desde
+     "auto") — sale enteramente del grid-rows interno, igual que en desktop. */
+  .showcase-mobile-item {
+    /* El espaciado entre pills vive en `margin-right` (no `gap` en la fila)
+       a propósito: así colapsa a 0 junto con el ancho, en el mismo item que
+       se oculta. Con `gap` el espacio entre pares de hermanos colapsados
+       seguiría contando y desplazaría el centrado de forma distinta según
+       qué índice esté activo. */
+    width: 7rem;
+    margin-right: 0.75rem;
+    border-radius: 16px;
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width 700ms ease-in-out, margin-right 700ms ease-in-out, border-radius 700ms ease-in-out, opacity 300ms ease-out;
+  }
+  .showcase-mobile-item:last-child {
+    margin-right: 0;
+  }
+  .showcase-mobile-item[data-active="true"] {
+    /* Dejamos hueco a los lados (las flechas viven cortadas en el borde de
+       la pantalla, ver `.showcase-mobile-arrow` — este margen les sobra de
+       sobra). Con `justify-center` en la fila y los hermanos en 0 (ancho y
+       margen), esta es la única pieza con tamaño real, así que queda
+       centrada sin importar su índice. */
+    width: calc(100% - 4.5rem);
+    margin-right: 0;
+    border-radius: 24px;
+  }
+  /* Los hermanos se ocultan solo mientras uno está expandido (la fila lleva
+     el flag, no cada item, porque un item no puede saber por sí solo si
+     "otro" está activo). */
+  .showcase-mobile-row[data-expanded="true"] .showcase-mobile-item[data-active="false"] {
+    width: 0;
+    margin-right: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .showcase-mobile-panel-region {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 700ms ease-in-out;
+  }
+  .showcase-mobile-item[data-active="true"] .showcase-mobile-panel-region {
+    grid-template-rows: 1fr;
+  }
+
+  .showcase-mobile-item-close {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease-out;
+  }
+  .showcase-mobile-item[data-active="true"] .showcase-mobile-item-close {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Flechas: "cortadas" a la mitad en el borde de la pantalla (el círculo
+     está centrado exactamente sobre el borde; la sección tiene
+     `overflow-hidden`, así que recorta la mitad exterior y deja asomando
+     la mitad interior) — look intencional tipo Apple, no un bug. Círculo
+     blanco sólido (no `.glass`) con ícono gris oscuro. Ancladas a la altura
+     aproximada del centro vertical de la tarjeta expandida: la fila de
+     pills vive en `bottom-4` y, expandida, la tarjeta crece hacia arriba
+     hasta ~34vh de contenido + su cabecera — 20vh desde abajo cae
+     aproximadamente a mitad de ese rango. Solo visibles (y enfocables)
+     mientras algún ministerio está expandido. */
+  .showcase-mobile-arrow {
+    bottom: 20vh;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 22px;
+    background: #ffffff;
+    color: #334155;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease-out;
+  }
+  .showcase-mobile-arrow--prev {
+    left: 0;
+    transform: translateX(-50%);
+  }
+  .showcase-mobile-arrow--next {
+    right: 0;
+    transform: translateX(50%);
+  }
+  .showcase-mobile-row[data-expanded="true"] ~ .showcase-mobile-arrow {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .showcase-mobile-item,
+    .showcase-mobile-panel-region,
+    .showcase-mobile-item-close,
+    .showcase-mobile-arrow {
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
 
 <script>
   document.addEventListener('astro:page-load', () => {
@@ -316,6 +569,99 @@ function withBold(text: string): string {
 
       prevBtn?.addEventListener('click', () => activate(activeIndex - 1, true));
       nextBtn?.addEventListener('click', () => activate(activeIndex + 1, true));
+    });
+  });
+</script>
+
+<script>
+  // Showcase mobile (<lg): cada pill "crece en su lugar" hasta volverse
+  // tarjeta — mismo mecanismo que el accordion desktop (ancho +
+  // grid-template-rows), adaptado a una fila horizontal donde, a
+  // diferencia de desktop, en reposo ningún ministerio está activo.
+  // Independiente del script desktop de arriba — no comparte estado ni
+  // selectores con él (las clases `.showcase-item`/`.showcase-pill` se
+  // reutilizan por nombre pero cada root las consulta de forma aislada).
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLElement>('[data-showcase-mobile]').forEach((root) => {
+      const photos = Array.from(root.querySelectorAll<HTMLElement>('.showcase-mobile-photo'));
+      const row = root.querySelector<HTMLElement>('[data-row]');
+      const items = Array.from(root.querySelectorAll<HTMLElement>('.showcase-mobile-item'));
+      const prevBtn = root.querySelector<HTMLButtonElement>('[data-mobile-prev]');
+      const nextBtn = root.querySelector<HTMLButtonElement>('[data-mobile-next]');
+      const total = items.length;
+      if (!row || total === 0) return;
+
+      let activeIndex = -1;
+
+      function setPhoto(index: number) {
+        photos.forEach((p, i) => {
+          p.dataset.active = i === index ? 'true' : 'false';
+        });
+      }
+
+      function setItemState(index: number, active: boolean) {
+        const item = items[index];
+        item.dataset.active = active ? 'true' : 'false';
+        const pill = item.querySelector<HTMLButtonElement>('.showcase-pill');
+        const panel = item.querySelector<HTMLElement>('[role="region"]');
+        pill?.setAttribute('aria-expanded', active ? 'true' : 'false');
+        panel?.setAttribute('aria-hidden', active ? 'false' : 'true');
+      }
+
+      function expand(index: number) {
+        const next = ((index % total) + total) % total;
+        if (activeIndex !== -1 && activeIndex !== next) {
+          setItemState(activeIndex, false);
+        }
+        activeIndex = next;
+        setItemState(activeIndex, true);
+        setPhoto(activeIndex);
+        row!.dataset.expanded = 'true';
+        items.forEach((item, i) => item.toggleAttribute('inert', i !== activeIndex));
+        prevBtn?.removeAttribute('inert');
+        nextBtn?.removeAttribute('inert');
+      }
+
+      function collapse() {
+        if (activeIndex === -1) return;
+        const closedIndex = activeIndex;
+        setItemState(closedIndex, false);
+        row!.dataset.expanded = 'false';
+        activeIndex = -1;
+        items.forEach((item) => item.removeAttribute('inert'));
+        prevBtn?.setAttribute('inert', '');
+        nextBtn?.setAttribute('inert', '');
+        items[closedIndex].querySelector<HTMLButtonElement>('.showcase-pill')?.focus();
+      }
+
+      items.forEach((item, i) => {
+        const pill = item.querySelector<HTMLButtonElement>('.showcase-pill');
+        pill?.addEventListener('click', () => {
+          if (activeIndex === i) collapse();
+          else expand(i);
+        });
+        item.querySelector<HTMLButtonElement>('[data-mobile-close]')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          collapse();
+        });
+      });
+
+      // Las flechas son únicas para toda la fila (fuera de la tarjeta), no
+      // una por ministerio: navegan sobre el índice activo actual.
+      prevBtn?.addEventListener('click', () => expand(activeIndex - 1));
+      nextBtn?.addEventListener('click', () => expand(activeIndex + 1));
+
+      // Escape colapsa la tarjeta activa (no es un modal, así que no hace
+      // falta atrapar el foco: los hermanos quedan `inert`, no bloqueados
+      // detrás de un overlay).
+      root.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && activeIndex !== -1) {
+          e.preventDefault();
+          collapse();
+        }
+      });
+
+      setPhoto(0);
     });
   });
 </script>

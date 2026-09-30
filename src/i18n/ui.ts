@@ -23,7 +23,7 @@ export const routes = {
 
 export const ui = {
   en: {
-    "meta.title": "Venezuela NOW — Help Earthquake Survivors in Venezuela",
+    "meta.title": "Venezuela NOW",
     "meta.description":
       "Venezuela NOW, Inc. is a 501(c)(3) nonprofit dedicated to supporting survivors of the Venezuela earthquakes with food, shelter, and medical care.",
 
@@ -61,7 +61,7 @@ export const ui = {
 
     "response.heading": "Our response, in numbers",
     "response.intro":
-      "In the weeks since the earthquakes, Venezuela Now's ministries have responded together — bringing school supplies and play back to children through Grow School, medical care through mobile clinics with Wesley Medical Center, spiritual companionship through the Seminary, food and hygiene essentials through our missions teams, and the presence of the Global Methodist Church in the hardest-hit communities. This is what your support has already made possible.",
+      "In the weeks since the earthquakes, Venezuela Now's ministries have responded together — bringing school supplies and play back to children through Grow School, medical care through mobile clinics with Wesley Medical Center, and the presence of the Global Methodist Church in the hardest-hit communities. This is what your support has already made possible.",
 
     "stories.heading": "Stories and news",
     "stories.subtitle": "What's happening on the ground.",
@@ -78,6 +78,7 @@ export const ui = {
       "Explore how Venezuela Now carries out its work — from theological training to medical care on the ground.",
     "showcase.prevAria": "Previous ministry",
     "showcase.nextAria": "Next ministry",
+    "showcase.closeAria": "Close",
 
     "about.eyebrow": "Who we are",
     "about.titlePre": "Real help, driven by",
@@ -162,7 +163,7 @@ export const ui = {
 
     "response.heading": "Nuestra respuesta, en cifras",
     "response.intro":
-      "En las semanas desde los terremotos, los ministerios de Venezuela Now han respondido juntos — llevando útiles escolares y alegría a los niños a través de Zonas Crecer, atención médica mediante clínicas móviles con el Centro Médico Wesley, acompañamiento espiritual a través del Seminario, alimentos e higiene esencial mediante nuestros equipos de misiones, y la presencia de la Iglesia Metodista Global en las comunidades más golpeadas. Esto es lo que tu apoyo ya hizo posible.",
+      "En las semanas desde los terremotos, los ministerios de Venezuela Now han respondido juntos — llevando útiles escolares y alegría a los niños a través de Zonas Crecer, atención médica mediante clínicas móviles con el Centro Médico Wesley, y la presencia de la Iglesia Metodista Global en las comunidades más golpeadas. Esto es lo que tu apoyo ya hizo posible.",
 
     "stories.heading": "Historias y noticias",
     "stories.subtitle": "Lo que está pasando en el terreno.",
@@ -179,6 +180,7 @@ export const ui = {
       "Descubre cómo Venezuela Now lleva a cabo su trabajo — desde la formación teológica hasta la atención médica en el terreno.",
     "showcase.prevAria": "Ministerio anterior",
     "showcase.nextAria": "Ministerio siguiente",
+    "showcase.closeAria": "Cerrar",
 
     "about.eyebrow": "Quiénes somos",
     "about.titlePre": "Ayuda real, impulsada por",

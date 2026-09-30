@@ -1,110 +1,99 @@
 ---
 import ImpactCard from "./ImpactCard.astro";
 import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import zonasCrecerCover from "../assets/img/zonas-crecer.webp";
+import centroMedicoWesleyCover from "../assets/img/centro-medico-wesley.webp";
+import iglesiaMetodistaCover from "../assets/img/iglesia-metodista.webp";
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
-// Una cifra bandera por ministerio (redondeada, la más representativa de su
-// categoría) + una frase narrativa — evita leerse como inventario y no exige
-// mantener exactitud perfecta en cifras sueltas. Datos reales provistos por
-// el cliente (respuesta a los terremotos, 2025).
+// Una cifra bandera por ministerio + un párrafo preciso sobre el trabajo
+// detrás de ella (no una lista de cifras sueltas). Datos y redacción reales
+// provistos por el cliente a partir del viaje misionero de agosto de 2025.
 const responses = [
   {
     id: "children",
     icon: "book",
-    title_en: "Grow School — Children",
-    title_es: "Zonas Crecer — Niñez",
+    cover: zonasCrecerCover,
+    coverAlt_en:
+      "Three smiling children each holding an illustrated storybook and a bag of treats, on a dirt lot with trees in the background.",
+    coverAlt_es:
+      "Tres niños sonriendo, cada uno sosteniendo un folleto ilustrado y una bolsa de golosinas, en una zona de tierra con árboles al fondo.",
+    title_en: "Grow School",
+    title_es: "Zonas Crecer",
     statValue_en: "3,000+",
     statValue_es: "3,000+",
     statLabel_en: "children reached with school supplies and care",
     statLabel_es: "niños alcanzados con útiles escolares y cuidado",
-    context_en: "Over 400 schools were destroyed in La Guaira alone. Grow School is bringing color back to children's lives.",
-    context_es: "Más de 400 escuelas quedaron destruidas solo en La Guaira. Zonas Crecer está devolviendo color a la vida de estos niños.",
+    paragraph_en:
+      "More than 400 schools were destroyed in La Guaira alone, leaving thousands of children without places to learn or play. Grow School visits shelters bringing illustrated Bible story books, school supply kits, clean water, and treat bags — bringing back smiles and hope for the next generation.",
+    paragraph_es:
+      "Más de 400 escuelas quedaron destruidas solo en La Guaira, dejando a miles de niños sin espacios de aprendizaje ni juego. Zonas Crecer recorre los refugios llevando libros de historias bíblicas, kits escolares, agua limpia y cotillones con golosinas, devolviendo la sonrisa y la esperanza a la próxima generación.",
+    quote_en: "Every book, every color, every moment of attention is an investment in rebuilding their future.",
+    quote_es: "Cada libro, cada color, cada momento de atención es una inversión en la reconstrucción de su futuro.",
   },
   {
     id: "medical",
     icon: "medical",
+    cover: centroMedicoWesleyCover,
+    coverAlt_en:
+      "A medical team of about twelve people in white hard hats and green and turquoise scrubs, standing in front of two green Centro Medico Wesley tents beside a mobile unit.",
+    coverAlt_es:
+      "Equipo médico de unas doce personas con cascos blancos y uniformes verdes y turquesa, de pie frente a dos carpas verdes del Centro Médico Wesley junto a una unidad móvil.",
     title_en: "Wesley Medical Center",
     title_es: "Centro Médico Wesley",
     statValue_en: "3,000+",
     statValue_es: "3,000+",
-    statLabel_en: "patients treated, including nutrition care for children",
-    statLabel_es: "pacientes atendidos, incluyendo apoyo nutricional infantil",
-    context_en: "A mobile hospital reaching zones with little to no medical access.",
-    context_es: "Un hospital móvil llegando a zonas con poco o ningún acceso médico.",
-  },
-  {
-    /* TODO: el cliente mencionó un video de testimonios para esta categoría.
-       Pendiente: recibir el archivo/enlace y decidir si va embebido aquí o
-       en una página de detalle del Seminario. */
-    id: "seminary",
-    icon: "heart",
-    title_en: "Seminary — Spiritual Care",
-    title_es: "Seminario — Apoyo Espiritual",
-    statValue_en: "Hundreds",
-    statValue_es: "Cientos",
-    statLabel_en: "supported through spiritual care and shared stories",
-    statLabel_es: "acompañados con apoyo espiritual e historias compartidas",
-    context_en: "The most essential work: simply being heard.",
-    context_es: "El trabajo más esencial: simplemente ser escuchados.",
-  },
-  {
-    id: "missions",
-    icon: "box",
-    title_en: "Missions — Food & Essentials",
-    title_es: "Misiones — Alimentos y Esenciales",
-    statValue_en: "4",
-    statValue_es: "4",
-    statLabel_en: "mission trips delivering food and hygiene essentials",
-    statLabel_es: "misiones entregando alimentos y esenciales de higiene",
-    context_en: "80% of La Guaira's affected population lost their livelihoods — these essentials are a lifeline.",
-    context_es: "El 80% de la población afectada en La Guaira perdió sus medios de vida — estos recursos son un salvavidas.",
+    statLabel_en: "chronic patients treated, including nutrition care for children",
+    statLabel_es: "pacientes crónicos atendidos, incluyendo apoyo nutricional infantil",
+    paragraph_en:
+      "With hospitals overwhelmed and private clinics out of reach, a team of internists, pediatricians, and gastroenterologists travels the area in a mobile hospital, bringing care to the most forgotten shelters. We've delivered 50,000 liters of clean water and treated cases of severe childhood malnutrition with therapeutic formula and food kits.",
+    paragraph_es:
+      "Con los hospitales colapsados y las clínicas privadas fuera de alcance, un equipo de internistas, pediatras y gastroenterólogos recorre la zona en un hospital móvil, llevando atención a los refugios más olvidados. Hemos entregado 50,000 litros de agua potable y tratado casos de desnutrición infantil severa con fórmulas y kits de alimentos terapéuticos.",
+    quote_en: "We're bringing excellent care and hope to those the system has left behind.",
+    quote_es: "Estamos llevando atención de excelencia y esperanza a quienes el sistema ha dejado atrás.",
   },
   {
     id: "church",
     icon: "church",
+    cover: iglesiaMetodistaCover,
+    coverAlt_en:
+      "Bishop Carlos Pirona talking with a group of young people outdoors, with a truck and an ambulance blurred in the background.",
+    coverAlt_es:
+      "El Obispo Carlos Pirona conversando con un grupo de jóvenes al aire libre, con una camioneta y una ambulancia desenfocadas al fondo.",
     title_en: "Global Methodist Church",
     title_es: "Iglesia Metodista Global",
     statValue_en: "10,000+",
     statValue_es: "10,000+",
-    statLabel_en: "lives reached through evangelism and outreach",
+    statLabel_en: "people reached through evangelism and outreach",
     statLabel_es: "personas impactadas a través de evangelismo y misiones",
-    context_en: "Being the hands and feet of Jesus in the places of greatest need.",
-    context_es: "Siendo las manos y los pies de Jesús en los lugares de mayor necesidad.",
+    paragraph_en:
+      "We found a people thirsting for the word of God, with an urgent need to be heard. The Global Methodist Church walks alongside families with a permanent pastoral presence, evangelistic campaigns, sports outreach, and personal evangelism in the streets and shelters — being the hands and feet of Jesus in Venezuela's place of greatest need.",
+    paragraph_es:
+      "Encontramos un pueblo con el corazón sediento de la palabra de Dios, con una necesidad urgente de ser escuchado. La Iglesia Metodista Global acompaña a las familias con presencia pastoral permanente, campañas evangelísticas, deporte y evangelización personal en calles y refugios, siendo las manos y los pies de Jesús en el lugar de mayor necesidad de Venezuela.",
+    quote_en: "Every life that finds hope is proof that, together with you, this is possible.",
+    quote_es: "Cada vida que encuentra esperanza es prueba de que, junto a ustedes, esto está siendo posible.",
   },
 ] as const;
 
 const icons: Record<string, string> = {
-  book:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 6c-1.5-1.3-3.5-2-6-2v14c2.5 0 4.5.7 6 2 1.5-1.3 3.5-2 6-2V4c-2.5 0-4.5.7-6 2Z"/><path d="M12 6v14"/></svg>',
-  church:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v3M10.3 3.5h3.4"/><path d="M12 5.5 20 11h-2.2v10H6.2V11H4l8-5.5Z"/><path d="M9.8 21v-4.8a2.2 2.2 0 0 1 4.4 0V21"/></svg>',
-  medical:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/></svg>',
-  heart:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20.5s-7.5-4.6-9.8-9A5.3 5.3 0 0 1 12 6.2 5.3 5.3 0 0 1 21.8 11.5c-2.3 4.4-9.8 9-9.8 9Z"/></svg>',
-  box:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8.5 12 4l9 4.5-9 4.5-9-4.5Z"/><path d="M3 8.5V16l9 4.5V13"/><path d="M21 8.5V16l-9 4.5"/></svg>',
+  book: `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 26 26"><path d="M0 0h26v26H0z" fill="none" /><path fill="currentColor" d="M9.875 0a1 1 0 0 0-.406.156S8.204.952 6.844 1.813c-1.36.86-2.873 1.808-3.219 2l-.063.03C2.306 4.618 2.045 5.884 2 6.594c-.003.033 0 .06 0 .095c-.011.266 0 .437 0 .437v13.063C2 22.087 4.213 23 6.313 23c.7 0 1.4-.113 2-.313c.4-.2.687-.6.687-1v-10.5c0-2.3.5-3.38 2-4.28c.4-.2 4.594-3.095 4.594-3.095c.2-.2.406-.606.406-.906v-.094c0-.4-.2-.706-.5-.906s-.7-.2-1 0c-.1.1-6.2 4.207-7.5 4.907c-1.3.8-2.513.993-2.813.593c-.093-.093-.174-.378-.187-.656v-.063c.001-.272.071-.784.625-1.125c.562-.313 1.957-1.204 3.313-2.062c.573-.363.644-.402 1.093-.688A1 1 0 0 0 11 2.5V1a1 1 0 0 0-1.125-1m8 3.5a1 1 0 0 0-.438.188s-5.034 3.387-5.906 3.968l-.031.032c-.724.543-1.153 1.189-1.344 1.78A3.3 3.3 0 0 0 10 10.5v.313a1 1 0 0 0 0 .093V23c0 1.9 2.188 3 4.188 3c.9 0 1.712-.194 2.312-.594c1.2-.7 7-5.218 7-5.218c.3-.2.5-.482.5-.782v-13c0-.5-.194-.8-.594-1c-.3-.2-.793-.106-1.093.094c-1.6 1.2-5.907 4.588-6.907 5.188c-1.4.8-2.719 1-3.219.5c-.2-.2-.187-.388-.187-.688q.008-.26.063-.438c.056-.174.17-.388.593-.718c.02-.016.01-.015.031-.031c.723-.483 2.934-1.99 4.376-2.97A1 1 0 0 0 19 6V4.5a1 1 0 0 0-1.125-1M22 10.813v2l-5 3.874v-2z" /></svg>`,
+  medical: `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 48 48"><path d="M0 0h48v48H0z" fill="none" /><defs><mask id="ic-medical-kit"><g fill="none"><rect width="38" height="26" x="5" y="16" fill="#fff" stroke="#fff" stroke-linejoin="round" stroke-width="4" rx="3" /><path fill="#fff" d="M19 8h10V4H19zm11 1v7h4V9zm-12 7V9h-4v7zm11-8a1 1 0 0 1 1 1h4a5 5 0 0 0-5-5zM19 4a5 5 0 0 0-5 5h4a1 1 0 0 1 1-1z" /><path stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M18 29h12m-6-6v12" /></g></mask></defs><path fill="currentColor" d="M0 0h48v48H0z" mask="url(#ic-medical-kit)" /></svg>`,
+  church: `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none" /><path fill="currentColor" d="M10 22v-4a2 2 0 0 1 4 0v4h4V12a1 1 0 0 0-.485-.857L13 8.434V6h2V4h-2V2h-2v2H9v2h2v2.434l-4.515 2.709A1 1 0 0 0 6 12v10zm-7 0h2v-8.118l-2.447 1.224A1 1 0 0 0 2 16v5a1 1 0 0 0 1 1m18.447-6.895L19 13.882V22h2a1 1 0 0 0 1-1v-5c0-.379-.214-.725-.553-.895" /></svg>`,
 };
 
-// Traduce cada entrada al idioma activo. El único dato disponible por
-// tarjeta es la cifra bandera + su descripción, así que se usa también como
-// `items` (una sola línea) para que el panel revelado anime esa misma cifra.
-const cards = responses.map((item) => {
-  const title = lang === "es" ? item.title_es : item.title_en;
-  const statValue = lang === "es" ? item.statValue_es : item.statValue_en;
-  const statLabel = lang === "es" ? item.statLabel_es : item.statLabel_en;
-  const quote = lang === "es" ? item.context_es : item.context_en;
-  return {
-    icon: icons[item.icon],
-    title,
-    stat: statValue,
-    statLabel,
-    items: [`${statValue} ${statLabel}`],
-    quote,
-  };
-});
+// Traduce cada entrada al idioma activo.
+const cards = responses.map((item) => ({
+  icon: icons[item.icon],
+  cover: item.cover,
+  coverAlt: lang === "es" ? item.coverAlt_es : item.coverAlt_en,
+  title: lang === "es" ? item.title_es : item.title_en,
+  stat: lang === "es" ? item.statValue_es : item.statValue_en,
+  statLabel: lang === "es" ? item.statLabel_es : item.statLabel_en,
+  paragraph: lang === "es" ? item.paragraph_es : item.paragraph_en,
+  quote: lang === "es" ? item.quote_es : item.quote_en,
+}));
 ---
 
 <section id="respuesta" class="py-24 bg-slate-50" aria-labelledby="respuesta-heading">
@@ -118,20 +107,18 @@ const cards = responses.map((item) => {
       </p>
     </div>
 
-    <!-- 6 columnas en desktop: cada tarjeta ocupa 2, y la 2ª fila (2 tarjetas) queda centrada -->
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {
         cards.map((card, i) => (
-          <div
-            class:list={["reveal", "lg:col-span-2", i === 3 && "lg:col-start-2"]}
-            style={`transition-delay: ${i * 0.1}s`}
-          >
+          <div class="reveal" style={`transition-delay: ${i * 0.1}s`}>
             <ImpactCard
               title={card.title}
-              items={card.items}
-              quote={card.quote}
+              coverUrl={card.cover}
+              coverAlt={card.coverAlt}
               stat={card.stat}
               statLabel={card.statLabel}
+              paragraph={card.paragraph}
+              quote={card.quote}
             >
               <Fragment set:html={card.icon} />
             </ImpactCard>

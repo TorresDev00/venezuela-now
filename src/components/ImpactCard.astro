@@ -1,77 +1,101 @@
 ---
 /**
  * ImpactCard
- * Tarjeta con icono + título. Al pulsar el botón (+ → X) una onda circular
- * nace desde el botón, cubre la tarjeta y revela la cifra, que cuenta desde
- * 0 hasta su valor real, junto a la cita del ministerio.
+ * Tarjeta con foto de fondo real, cifra destacada y título. La cifra cuenta
+ * desde 0 en cuanto la tarjeta entra en pantalla (no al abrir). Al pulsar el
+ * botón (+ → X) una onda circular nace desde el propio botón, cubre la
+ * tarjeta y revela un párrafo sobre el trabajo detrás de la cifra, más una
+ * cita de cierre.
  *
  * El icono se pasa por <slot /> (igual que en las tarjetas de AboutImpact).
  */
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
 interface Props {
   title: string;
-  /** Cada línea. Si empieza con una cifra ("3,000+", "~500", "4") se destaca y se anima. */
-  items: string[];
-  /** Frase final en cursiva (opcional). */
+  /** Foto de fondo, importada desde src/assets/img (ej. `import cover from "../assets/img/x.webp"`). */
+  coverUrl: ImageMetadata;
+  /** Texto alternativo descriptivo de la foto. */
+  coverAlt: string;
+  /** Cifra grande de portada, ej. "3,000+", "Hundreds", "10,000+". */
+  stat: string;
+  /** Frase corta bajo la cifra, ej. "niños alcanzados con útiles escolares". */
+  statLabel: string;
+  /** Párrafo preciso que se revela al abrir la tarjeta (2–4 frases). */
+  paragraph: string;
+  /** Cita de cierre en cursiva (opcional). */
   quote?: string;
-  /** Cifra que se ve en la cara frontal. Por defecto: la primera cifra de `items`. */
-  stat?: string;
-  statLabel?: string;
+  /** object-position de la foto, para reencuadrar rostros si "center" los corta mal. */
+  focalPoint?: string;
   class?: string;
 }
 
-const { title, items, quote, stat, statLabel, class: className } = Astro.props;
+const {
+  title,
+  coverUrl,
+  coverAlt,
+  stat,
+  statLabel,
+  paragraph,
+  quote,
+  focalPoint = "center",
+  class: className,
+} = Astro.props;
 
-type Parsed =
-  | { kind: "number"; prefix: string; raw: string; value: number; decimals: number; suffix: string; label: string }
-  | { kind: "text"; label: string };
+// Si la cifra empieza con un número, se anima con count-up; si no (ej. "Hundreds"),
+// se muestra tal cual, sin animación numérica.
+const statMatch = stat.trim().match(/^([~≈]?)(\d[\d,]*(?:\.\d+)?)(\+?)$/);
+const statIsNumeric = Boolean(statMatch);
+const statPrefix = statMatch?.[1] ?? "";
+const statRaw = statMatch?.[2] ?? "";
+const statSuffix = statMatch?.[3] ?? "";
+const statValue = statRaw ? Number(statRaw.replace(/,/g, "")) : 0;
+const statDecimals = statRaw.includes(".") ? statRaw.split(".")[1].length : 0;
 
-const parse = (line: string): Parsed => {
-  const m = line.trim().match(/^([~≈]?)(\d[\d,]*(?:\.\d+)?)(\+?)\s+(.+)$/);
-  if (!m) return { kind: "text", label: line };
-  const [, prefix, raw, suffix, label] = m;
-  return {
-    kind: "number",
-    prefix,
-    raw,
-    value: Number(raw.replace(/,/g, "")),
-    decimals: raw.includes(".") ? raw.split(".")[1].length : 0,
-    suffix,
-    label,
-  };
-};
-
-const parsed = items.map(parse);
-const firstNumber = parsed.find((p) => p.kind === "number");
-const frontStat = stat ?? (firstNumber?.kind === "number" ? `${firstNumber.prefix}${firstNumber.raw}${firstNumber.suffix}` : undefined);
-const frontStatLabel = statLabel ?? (firstNumber?.kind === "number" && !stat ? firstNumber.label : undefined);
-
-// El slot se renderiza una vez y se reutiliza (insignia + marca de agua)
 const icon = Astro.slots.has("default") ? await Astro.slots.render("default") : "";
-
 const uid = `ic-${Math.random().toString(36).slice(2, 9)}`;
-const REVEAL_BASE = 280; // ms, debe coincidir con el CSS
-const REVEAL_STEP = 70;
 ---
 
 <article
   class:list={["impact-card", className]}
   data-ic-card
+  style={`--ic-focal: ${focalPoint};`}
 >
+  <Image
+    src={coverUrl}
+    alt={coverAlt}
+    class="impact-card__cover"
+    loading="lazy"
+    widths={[420, 640, 900]}
+    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+  />
+  <div class="impact-card__scrim" aria-hidden="true"></div>
+
   <!-- Cara frontal -->
   <div class="impact-card__front" data-ic-front>
-    <span class="impact-card__ghost" aria-hidden="true"><Fragment set:html={icon} /></span>
-
     <span class="impact-card__badge" aria-hidden="true"><Fragment set:html={icon} /></span>
 
     <div class="impact-card__bottom">
-      {
-        frontStat && (
-          <p class="impact-card__stat">
-            <span class="impact-card__stat-value">{frontStat}</span>
-            {frontStatLabel && <span class="impact-card__stat-label">{frontStatLabel}</span>}
-          </p>
-        )
-      }
+      <p class="impact-card__stat">
+        {
+          statIsNumeric ? (
+            <span
+              class="impact-card__stat-value"
+              data-ic-count
+              data-target={statValue}
+              data-decimals={statDecimals}
+              data-prefix={statPrefix}
+              data-suffix={statSuffix}
+            >
+              {`${statPrefix}${statRaw}${statSuffix}`}
+            </span>
+          ) : (
+            <span class="impact-card__stat-value">{stat}</span>
+          )
+        }
+      </p>
+      <p class="impact-card__stat-label">{statLabel}</p>
       <h3 class="impact-card__title" id={`${uid}-title`}>{title}</h3>
     </div>
   </div>
@@ -86,41 +110,12 @@ const REVEAL_STEP = 70;
     data-ic-panel
     inert
   >
-    <span class="impact-card__ghost impact-card__ghost--panel" aria-hidden="true"><Fragment set:html={icon} /></span>
-
     <div class="impact-card__panel-inner" data-ic-scroll>
       <p class="impact-card__panel-title" data-reveal style="--i: 0">{title}</p>
-
-      <ul class="impact-card__list">
-        {
-          parsed.map((item, i) => (
-            <li class="impact-card__item" data-reveal style={`--i: ${i + 1}`}>
-              {item.kind === "number" ? (
-                <>
-                  <span
-                    class="impact-card__num"
-                    data-ic-count
-                    data-target={item.value}
-                    data-decimals={item.decimals}
-                    data-prefix={item.prefix}
-                    data-suffix={item.suffix}
-                    data-delay={REVEAL_BASE + (i + 1) * REVEAL_STEP + 120}
-                  >
-                    {`${item.prefix}${item.raw}${item.suffix}`}
-                  </span>
-                  <span class="impact-card__label">{item.label}</span>
-                </>
-              ) : (
-                <span class="impact-card__label impact-card__label--solo">{item.label}</span>
-              )}
-            </li>
-          ))
-        }
-      </ul>
-
+      <p class="impact-card__paragraph" data-reveal style="--i: 1">{paragraph}</p>
       {
         quote && (
-          <p class="impact-card__quote" data-reveal style={`--i: ${parsed.length + 1}`}>
+          <p class="impact-card__quote" data-reveal style="--i: 2">
             {quote}
           </p>
         )
@@ -150,7 +145,8 @@ const REVEAL_STEP = 70;
 
   function countUp(el: HTMLElement) {
     const target = Number(el.dataset.target);
-    if (!Number.isFinite(target)) return;
+    if (!Number.isFinite(target) || el.dataset.counted === "true") return;
+    el.dataset.counted = "true";
 
     const decimals = Number(el.dataset.decimals ?? 0);
     const prefix = el.dataset.prefix ?? "";
@@ -162,23 +158,36 @@ const REVEAL_STEP = 70;
         suffix;
     };
 
-    cancelAnimationFrame(Number(el.dataset.raf ?? 0));
     if (prefersReducedMotion()) return render(target);
 
-    const delay = Number(el.dataset.delay ?? 0);
-    const duration = 1200;
+    const duration = 1400;
     let start: number | null = null;
     render(0);
 
     const tick = (now: number) => {
-      start ??= now + delay;
+      start ??= now;
       const t = Math.min(Math.max((now - start) / duration, 0), 1);
       const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t); // easeOutExpo
       render(target * eased);
-      if (t < 1) el.dataset.raf = String(requestAnimationFrame(tick));
+      if (t < 1) requestAnimationFrame(tick);
     };
-    el.dataset.raf = String(requestAnimationFrame(tick));
+    requestAnimationFrame(tick);
   }
+
+  // Cuenta el número de portada en cuanto la tarjeta entra en pantalla.
+  const cards = document.querySelectorAll<HTMLElement>("[data-ic-card]");
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const counter = entry.target.querySelector<HTMLElement>("[data-ic-count]");
+        if (counter) countUp(counter);
+        io.unobserve(entry.target);
+      }
+    },
+    { threshold: 0.4 },
+  );
+  cards.forEach((card) => io.observe(card));
 
   function setOpen(card: HTMLElement, open: boolean) {
     const toggle = card.querySelector<HTMLButtonElement>("[data-ic-toggle]");
@@ -196,7 +205,6 @@ const REVEAL_STEP = 70;
     if (open) {
       const scroller = panel.querySelector<HTMLElement>("[data-ic-scroll]");
       if (scroller) scroller.scrollTop = 0;
-      panel.querySelectorAll<HTMLElement>("[data-ic-count]").forEach(countUp);
     }
   }
 
@@ -250,10 +258,6 @@ const REVEAL_STEP = 70;
   .impact-card {
     --ic-accent: var(--color-brand-blue-deep);
     --ic-on-accent: #ffffff;
-    --ic-surface: #ffffff;
-    --ic-ink: var(--color-brand-ink);
-    --ic-muted: #64748b;
-    --ic-line: rgb(10 10 35 / 0.08);
     --ic-ease: cubic-bezier(0.77, 0, 0.18, 1);
     --ic-btn: 3.25rem;
     --ic-btn-gap: 1.25rem;
@@ -265,13 +269,20 @@ const REVEAL_STEP = 70;
     height: 100%;
     min-height: 27rem;
     border-radius: 1.5rem;
-    background: var(--ic-surface);
-    color: var(--ic-ink);
-    border: 1px solid var(--ic-line);
-    box-shadow: 0 8px 32px rgb(10 10 35 / 0.06);
-    transition:
-      transform 0.5s var(--ic-ease),
-      border-color 0.4s ease;
+    background-color: var(--color-brand-ink);
+    color: #ffffff;
+    box-shadow: 0 8px 32px rgb(10 10 35 / 0.12);
+    transition: transform 0.5s var(--ic-ease);
+  }
+
+  .impact-card__cover {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--ic-focal, center);
   }
 
   /* Luz que sigue al cursor */
@@ -279,11 +290,11 @@ const REVEAL_STEP = 70;
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: 1;
     pointer-events: none;
     background: radial-gradient(
-      20rem circle at var(--ic-mx, 50%) var(--ic-my, 0%),
-      color-mix(in srgb, var(--ic-accent) 10%, transparent),
+      22rem circle at var(--ic-mx, 50%) var(--ic-my, 0%),
+      rgb(255 255 255 / 0.12),
       transparent 70%
     );
     opacity: 0;
@@ -296,18 +307,40 @@ const REVEAL_STEP = 70;
 
   .impact-card:not(.is-open):hover {
     transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--ic-accent) 35%, transparent);
   }
 
   .impact-card:hover::before {
     opacity: 1;
   }
 
+  /* Degradado permanente sobre la foto, para que el texto siempre sea legible */
+  .impact-card__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgb(0 0 0 / 0.85) 0%,
+      rgb(0 0 0 / 0.55) 32%,
+      rgb(0 0 0 / 0.1) 60%,
+      rgb(0 0 0 / 0.35) 100%
+    );
+    transition:
+      opacity 0.45s ease 0.3s,
+      filter 0.45s ease 0.3s;
+  }
+
+  .is-open .impact-card__scrim {
+    opacity: 0;
+    transition-delay: 0s;
+  }
+
   /* ---------- Cara frontal ---------- */
   .impact-card__front {
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -320,8 +353,8 @@ const REVEAL_STEP = 70;
 
   .is-open .impact-card__front {
     opacity: 0;
-    transform: scale(0.9);
-    filter: blur(6px);
+    transform: scale(0.94);
+    filter: blur(4px);
     transition-delay: 0s;
   }
 
@@ -345,55 +378,32 @@ const REVEAL_STEP = 70;
     transform: rotate(-8deg) scale(1.06);
   }
 
-  .impact-card__ghost {
-    position: absolute;
-    top: 18%;
-    right: -3rem;
-    width: 15rem;
-    height: 15rem;
-    color: var(--ic-accent);
-    opacity: 0.06;
-    transform: rotate(-14deg);
-    transition: transform 0.9s var(--ic-ease);
-    pointer-events: none;
-  }
-
-  .impact-card__ghost :global(svg) {
-    width: 100%;
-    height: 100%;
-  }
-
-  .impact-card:not(.is-open):hover .impact-card__front .impact-card__ghost {
-    transform: rotate(0deg) scale(1.05);
-  }
-
   .impact-card__bottom {
     position: relative;
-    padding-right: calc(var(--ic-btn) + 0.75rem);
+    padding-right: calc(var(--ic-btn) + 0.5rem);
   }
 
   .impact-card__stat {
-    margin: 0 0 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+    margin: 0;
+    line-height: 0.9;
   }
 
   .impact-card__stat-value {
     font-family: var(--font-display);
-    font-size: clamp(2.75rem, 5vw, 4rem);
+    font-size: clamp(2.75rem, 5vw, 3.75rem);
     font-weight: 900;
-    line-height: 0.9;
     letter-spacing: -0.01em;
-    color: var(--ic-ink);
+    color: #ffffff;
+    text-shadow: 0 2px 18px rgb(0 0 0 / 0.35);
     font-variant-numeric: tabular-nums;
   }
 
   .impact-card__stat-label {
-    font-size: 0.875rem;
+    margin: 0.5rem 0 1rem;
+    font-size: 0.9375rem;
     line-height: 1.35;
-    color: var(--ic-muted);
-    max-width: 22ch;
+    color: rgb(255 255 255 / 0.85);
+    max-width: 30ch;
   }
 
   .impact-card__title {
@@ -409,7 +419,7 @@ const REVEAL_STEP = 70;
   .impact-card__panel {
     position: absolute;
     inset: 0;
-    z-index: 2;
+    z-index: 3;
     background: var(--ic-accent);
     color: var(--ic-on-accent);
     clip-path: circle(0px at var(--ic-origin));
@@ -422,21 +432,6 @@ const REVEAL_STEP = 70;
     transition-delay: 0s;
   }
 
-  .impact-card__ghost--panel {
-    top: auto;
-    bottom: -3.5rem;
-    left: -3.5rem;
-    right: auto;
-    color: currentColor;
-    opacity: 0.08;
-    transform: rotate(12deg) scale(0.8);
-  }
-
-  .is-open .impact-card__ghost--panel {
-    transform: rotate(0deg) scale(1);
-    transition-delay: 0.15s;
-  }
-
   .impact-card__panel-inner {
     position: relative;
     height: 100%;
@@ -446,51 +441,22 @@ const REVEAL_STEP = 70;
     display: flex;
     flex-direction: column;
     scrollbar-width: thin;
-    scrollbar-color: color-mix(in srgb, currentColor 30%, transparent) transparent;
+    scrollbar-color: rgb(255 255 255 / 0.3) transparent;
   }
 
   .impact-card__panel-title {
     font-family: var(--font-display);
     font-weight: 900;
-    margin: 0 0 1rem;
-    font-size: 1.125rem;
+    margin: 0 0 0.75rem;
+    font-size: 1.25rem;
     line-height: 1.2;
-    opacity: 0.75;
   }
 
-  .impact-card__list {
-    list-style: none;
+  .impact-card__paragraph {
     margin: 0;
-    padding: 0;
-  }
-
-  .impact-card__item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    padding: 0.8rem 0;
-    border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
-  }
-
-  .impact-card__num {
-    font-family: var(--font-display);
-    font-size: 1.875rem;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -0.01em;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .impact-card__label {
     font-size: 0.9375rem;
-    line-height: 1.4;
-    opacity: 0.85;
-  }
-
-  .impact-card__label--solo {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    opacity: 1;
+    line-height: 1.6;
+    color: rgb(255 255 255 / 0.92);
   }
 
   .impact-card__quote {
@@ -501,6 +467,7 @@ const REVEAL_STEP = 70;
     font-style: italic;
     font-size: 0.9375rem;
     line-height: 1.55;
+    color: rgb(255 255 255 / 0.85);
   }
 
   /* Entrada escalonada del contenido */
@@ -518,7 +485,7 @@ const REVEAL_STEP = 70;
     transition:
       opacity 0.5s ease,
       transform 0.7s var(--ic-ease);
-    transition-delay: calc(280ms + var(--i, 0) * 70ms);
+    transition-delay: calc(280ms + var(--i, 0) * 90ms);
   }
 
   /* ---------- Botón + / X ---------- */
@@ -526,21 +493,21 @@ const REVEAL_STEP = 70;
     position: absolute;
     right: var(--ic-btn-gap);
     bottom: var(--ic-btn-gap);
-    z-index: 3;
+    z-index: 4;
     display: grid;
     place-items: center;
     width: var(--ic-btn);
     height: var(--ic-btn);
     padding: 0;
     border-radius: 50%;
-    border: 2px solid var(--ic-ink);
-    background: transparent;
-    color: var(--ic-ink);
+    border: 2px solid #ffffff;
+    background: rgb(255 255 255 / 0.08);
+    backdrop-filter: blur(6px);
+    color: #ffffff;
     cursor: pointer;
     transition:
       background-color 0.3s ease,
-      color 0.3s ease,
-      border-color 0.3s ease;
+      color 0.3s ease;
   }
 
   .impact-card__toggle svg {
@@ -550,8 +517,8 @@ const REVEAL_STEP = 70;
   }
 
   .impact-card__toggle:hover {
-    background: var(--ic-ink);
-    color: var(--ic-surface);
+    background: #ffffff;
+    color: var(--ic-accent);
   }
 
   /* Anillo de foco: brand-yellow, igual que el resto de controles del sitio */
@@ -560,13 +527,12 @@ const REVEAL_STEP = 70;
     outline-offset: 3px;
   }
 
-  /* Anillo que invita a pulsar (solo al pasar el ratón por la tarjeta) */
   .impact-card__toggle::after {
     content: "";
     position: absolute;
     inset: -2px;
     border-radius: inherit;
-    border: 2px solid var(--ic-ink);
+    border: 2px solid #ffffff;
     opacity: 0;
     pointer-events: none;
   }
@@ -587,27 +553,17 @@ const REVEAL_STEP = 70;
     }
   }
 
-  .is-open .impact-card__toggle {
-    border-color: var(--ic-on-accent);
-    color: var(--ic-on-accent);
-  }
-
   .is-open .impact-card__toggle svg {
     transform: rotate(135deg);
-  }
-
-  .is-open .impact-card__toggle:hover {
-    background: var(--ic-on-accent);
-    color: var(--ic-accent);
   }
 
   /* ---------- Movimiento reducido ---------- */
   @media (prefers-reduced-motion: reduce) {
     .impact-card,
     .impact-card__front,
+    .impact-card__scrim,
     .impact-card__panel,
     .impact-card__badge,
-    .impact-card__ghost,
     .impact-card__toggle svg,
     .impact-card [data-reveal],
     .impact-card.is-open [data-reveal] {

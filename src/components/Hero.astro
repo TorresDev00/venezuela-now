@@ -26,15 +26,17 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
 ---
 
 <section class="hero relative h-screen overflow-hidden" aria-label={t("hero.sectionAria")}>
-  <!-- Capa 1: fotos, una por noticia. Crossfade por opacidad — mismo patrón
-       verificado en MinistriesShowcase (todas precargadas de antemano,
-       opacidad 0/100 según cuál está activa, loading eager solo en la primera). -->
-  <div class="absolute inset-0 surface-dark" aria-hidden="true">
+  <!-- Capa 1: fotos, una por noticia. Crossfade sin "dip": la foto entrante
+       sube de opacidad 0→1 POR ENCIMA de la saliente (que se queda en opacidad
+       1 hasta quedar tapada), así nunca hay un instante en que ambas estén a
+       medio desvanecer y se asome el fondo del contenedor. Sin escala/zoom:
+       solo transiciona opacity. Ver data-state en el script más abajo. -->
+  <div class="absolute inset-0 bg-brand-ink" aria-hidden="true">
     {news.map((story, i) => (
       <div
-        class="hero-photo absolute inset-0 opacity-0 scale-105 transition-[opacity,transform] duration-(--hero-transition) ease-out motion-reduce:transition-none data-[active=true]:opacity-100 data-[active=true]:scale-100"
+        class="hero-photo absolute inset-0"
         data-index={i}
-        data-active={i === 0 ? "true" : "false"}
+        data-state={i === 0 ? "active" : "idle"}
       >
         <Image
           src={story.data.image}
@@ -42,20 +44,18 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
           class="w-full h-full object-cover"
           widths={[480, 768, 1200, 1600]}
           sizes="100vw"
-          loading={i === 0 ? "eager" : "lazy"}
+          loading="eager"
           fetchpriority={i === 0 ? "high" : undefined}
+          decoding="async"
         />
       </div>
     ))}
   </div>
 
-  <!-- Overlay estándar para legibilidad con foto real -->
+  <!-- Overlay estándar para legibilidad: capa única y fija por encima de
+       todas las fotos, sin transiciones ni dependencia de qué foto está
+       activa, para que nunca parpadee al cambiar de foto. -->
   <div class="absolute inset-0 photo-overlay-strong pointer-events-none" aria-hidden="true"></div>
-
-  <!-- Scrim de amortiguación: se oscurece brevemente a mitad de cada crossfade
-       para disimular el salto de brillo entre fotos con luminosidad distinta
-       (ver PARTE B del brief) — no reemplaza el overlay de arriba, se suma. -->
-  <div class="hero-scrim-pulse absolute inset-0 bg-brand-ink opacity-0 pointer-events-none" aria-hidden="true"></div>
 
   <!-- Contenido -->
   <div class="relative z-10 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10 lg:pb-14 pt-24 lg:pt-28 flex flex-col justify-end lg:justify-between gap-8">
@@ -173,7 +173,36 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
      comparten esta variable, ver PARTE B del brief). Para depurar en cámara
      lenta, cambiar temporalmente este valor a algo como 3000ms. */
   .hero {
-    --hero-transition: 1300ms;
+    --hero-transition: 1200ms;
+  }
+
+  /* Crossfade sin dip: la entrante (data-state="active") sube de opacity
+     0→1 por encima (z-index 2) de la saliente (data-state="leaving"), que
+     se queda opaca y en z-index 1 hasta quedar tapada. Solo entonces el
+     script la pasa a "idle" (opacity 0 SIN transición, ver transitionend
+     en el script) — nunca hay un punto medio donde ambas sean transparentes
+     ni un fondo asomándose detrás. Sin scale/zoom: solo transiciona opacity. */
+  .hero-photo {
+    opacity: 0;
+    z-index: 0;
+    transition: opacity var(--hero-transition) ease-in-out;
+  }
+  .hero-photo[data-state="active"] {
+    opacity: 1;
+    z-index: 2;
+  }
+  .hero-photo[data-state="leaving"] {
+    opacity: 1;
+    z-index: 1;
+    transition: none;
+  }
+  .hero-photo[data-state="idle"] {
+    transition: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-photo {
+      transition-duration: 300ms;
+    }
   }
 
   @keyframes hero-news-progress {
@@ -191,21 +220,6 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
   .hero-news:focus-within .hero-news-dot-fill {
     animation-play-state: paused;
   }
-
-  /* Amortigua el salto de brillo entre fotos de luminosidad distinta:
-     oscurece el scrim a mitad del crossfade y vuelve a su opacidad normal. */
-  @keyframes hero-scrim-pulse {
-    0%, 100% { opacity: 0; }
-    50% { opacity: 0.45; }
-  }
-  .hero-scrim-pulse.is-pulsing {
-    animation: hero-scrim-pulse var(--hero-transition) ease-in-out;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hero-scrim-pulse.is-pulsing {
-      animation: none;
-    }
-  }
 </style>
 
 <script>
@@ -215,7 +229,6 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
       const photos = Array.from(section?.querySelectorAll<HTMLElement>(".hero-photo") ?? []);
       const textItems = Array.from(root.querySelectorAll<HTMLElement>(".hero-news-item"));
       const dots = Array.from(root.querySelectorAll<HTMLButtonElement>(".hero-news-dot"));
-      const scrimPulse = section?.querySelector<HTMLElement>(".hero-scrim-pulse");
       const total = dots.length;
       if (total === 0) return;
 
@@ -223,9 +236,6 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
       if (activeIndex === -1) activeIndex = 0;
 
       function setActive(index: number, active: boolean) {
-        const photo = photos[index];
-        if (photo) photo.dataset.active = active ? "true" : "false";
-
         const text = textItems[index];
         if (text) {
           text.dataset.active = active ? "true" : "false";
@@ -250,11 +260,28 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
         fill.style.animation = "";
       }
 
-      function pulseScrim() {
-        if (!scrimPulse) return;
-        scrimPulse.classList.remove("is-pulsing");
-        void scrimPulse.offsetWidth;
-        scrimPulse.classList.add("is-pulsing");
+      // Crossfade sin dip: la entrante sube a data-state="active" (opacity
+      // 0→1, por encima). La saliente pasa a "leaving" (se queda opaca,
+      // debajo) y solo al terminar la transición de opacidad de la entrante
+      // (transitionend, nunca setTimeout) cae a "idle" (opacity 0 sin
+      // transición) — para entonces ya está tapada, así que no se nota.
+      function crossfadePhoto(fromIndex: number, toIndex: number) {
+        photos.forEach((photo, i) => {
+          if (i !== fromIndex && i !== toIndex) photo.dataset.state = "idle";
+        });
+
+        const outgoing = photos[fromIndex];
+        const incoming = photos[toIndex];
+        if (outgoing) outgoing.dataset.state = "leaving";
+        if (!incoming) return;
+
+        incoming.dataset.state = "active";
+        const onOpacityEnd = (event: TransitionEvent) => {
+          if (event.target !== incoming || event.propertyName !== "opacity") return;
+          incoming.removeEventListener("transitionend", onOpacityEnd);
+          if (outgoing?.dataset.state === "leaving") outgoing.dataset.state = "idle";
+        };
+        incoming.addEventListener("transitionend", onOpacityEnd);
       }
 
       function activate(index: number) {
@@ -263,10 +290,11 @@ const news = (await getCollection("stories", ({ id }) => id.startsWith(`${lang}/
           restartFill(next);
           return;
         }
-        pulseScrim();
-        setActive(activeIndex, false);
+        const previous = activeIndex;
+        setActive(previous, false);
         activeIndex = next;
         setActive(activeIndex, true);
+        crossfadePhoto(previous, activeIndex);
       }
 
       dots.forEach((dot, i) => {
