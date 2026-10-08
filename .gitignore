@@ -16,11 +16,16 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.*
+!.env.example
+!studio/.env.example
 
 # playwright mcp cache / debug output
 .playwright-mcp/
 debug-videos/
 debug-frames/
+
+# Cloudflare/wrangler local state
+.wrangler/
 
 # macOS-specific files
 .DS_Store
