@@ -1,9 +1,18 @@
 ---
 import NewsCard from "./news/NewsCard.astro";
 import { getLatest, type ArticleKind } from "../lib/news";
-import { getLangFromUrl, useTranslations, useTranslatedPath } from "../i18n/utils";
+import { useTranslations, useTranslatedPath, type Lang } from "../i18n/utils";
 
-const lang = getLangFromUrl(Astro.url);
+interface Props {
+  lang: Lang;
+}
+
+// `lang` llega como prop, no se deriva de Astro.url: este componente se
+// renderiza como Server Island (server:defer), y esa sub-request siempre
+// pega a /_server-islands/NewsSection sin el prefijo de idioma de la página
+// que lo incluyó — detectarlo con getLangFromUrl() aquí daría siempre el
+// idioma por defecto, sin importar en qué idioma esté viendo el home.
+const { lang } = Astro.props;
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
 
@@ -21,7 +30,7 @@ const CHIPS: { label: string; type: ArticleKind }[] = [
 
 <section id="historias" class="py-16" style="background-color: var(--color-surface-cool)" aria-labelledby="historias-heading">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex flex-wrap items-end justify-between gap-6 mb-10 reveal">
+    <div class="flex flex-wrap items-end justify-between gap-6 mb-10">
       <div>
         <h2 id="historias-heading" class="font-display text-4xl sm:text-5xl font-black text-brand-ink mb-2">
           {t("stories.heading")}
@@ -47,7 +56,7 @@ const CHIPS: { label: string; type: ArticleKind }[] = [
         <p class="py-12 text-center text-slate-500">{t("news.emptyState")}</p>
       ) : (
         <>
-          <div class="grid gap-5 lg:grid-cols-3 mb-5 reveal">
+          <div class="grid gap-5 lg:grid-cols-3 mb-5">
             {feature && (
               <div class="lg:col-span-2">
                 <NewsCard article={feature} variant="feature" />
@@ -61,7 +70,7 @@ const CHIPS: { label: string; type: ArticleKind }[] = [
           </div>
 
           {compact.length > 0 && (
-            <div class="grid gap-5 sm:grid-cols-3 mb-10 reveal">
+            <div class="grid gap-5 sm:grid-cols-3 mb-10">
               {compact.map((article) => (
                 <NewsCard article={article} variant="compact" />
               ))}
@@ -71,7 +80,7 @@ const CHIPS: { label: string; type: ArticleKind }[] = [
       )
     }
 
-    <div class="text-center reveal">
+    <div class="text-center">
       <a
         href={translatePath("news")}
         class="inline-flex items-center justify-center rounded-full bg-brand-blue px-7 py-3.5 font-bold text-white transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
@@ -81,22 +90,3 @@ const CHIPS: { label: string; type: ArticleKind }[] = [
     </div>
   </div>
 </section>
-
-<script>
-  // No depende del listener `astro:page-load` del host (HomePage.astro):
-  // esta sección llega como Server Island (server:defer) después de esa
-  // carga inicial, así que arma su propio observer apenas se ejecuta.
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.1, rootMargin: "0px 0px -60px 0px" },
-  );
-
-  document.querySelectorAll<Element>("#historias .reveal").forEach((el) => observer.observe(el));
-</script>

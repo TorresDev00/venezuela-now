@@ -129,12 +129,12 @@ const jsonLd = {
     {
       moreNews.length > 0 && (
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 reveal" aria-labelledby="more-news-heading">
-          <h2 id="more-news-heading" class="font-display text-2xl sm:text-3xl font-black text-brand-ink mb-6">
+          <h2 id="more-news-heading" class="font-display text-[28px] lg:text-[32px] font-black text-brand-ink mb-6">
             {t("news.moreNews")}
           </h2>
-          <div class="grid gap-5 sm:grid-cols-3">
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-5 lg:grid-cols-3">
             {moreNews.map((item) => (
-              <NewsCard article={item} variant="compact" />
+              <NewsCard article={item} variant="more-news" />
             ))}
           </div>
         </section>

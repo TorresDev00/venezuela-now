@@ -170,7 +170,7 @@ const seismographPath =
     {/* <OrganizationsGrid /> — versión grid estática, conservada como alternativa */}
     <MinistriesShowcase />
 
-    <NewsSection server:defer>
+    <NewsSection lang={lang} server:defer>
       <div slot="fallback" class="py-16" style="background-color: var(--color-surface-cool)" aria-hidden="true">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="h-185 animate-pulse rounded-3xl bg-slate-200/70"></div>

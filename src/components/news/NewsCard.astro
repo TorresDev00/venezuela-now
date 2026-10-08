@@ -3,9 +3,20 @@ import type { NewsArticleSummary } from "../../lib/news";
 import { urlForImage } from "../../lib/sanity";
 import { getLangFromUrl, useTranslations, useTranslatedPath } from "../../i18n/utils";
 
+type Variant =
+  | "feature"
+  | "side"
+  | "grid"
+  | "compact"
+  | "bento-feature"
+  | "bento-side-top"
+  | "bento-side-bottom"
+  | "bento-bottom"
+  | "more-news";
+
 interface Props {
   article: NewsArticleSummary;
-  variant: "feature" | "side" | "grid" | "compact";
+  variant: Variant;
 }
 
 const { article, variant } = Astro.props;
@@ -31,161 +42,148 @@ const KIND_LABEL_KEY = {
 } as const;
 const kindLabel = t(KIND_LABEL_KEY[article.kind]);
 
+// Puntos de categoría del nuevo lenguaje visual (foto a sangre completa) —
+// ya no reutilizan brand-blue/brand-crimson: esos quedan reservados a
+// botones/CTAs, ver PASO 1 del brief.
 const KIND_DOT_CLASS = {
-  news: "bg-brand-blue",
-  story: "bg-brand-crimson",
-  report: "bg-white",
+  news: "bg-[#9A9BFF]",
+  story: "bg-[#FF6B88]",
+  report: "bg-brand-yellow",
 } as const;
 
+// Fondo de respaldo cuando el artículo no tiene imagen — nunca debería
+// pasar en producción, pero evita una card vacía si Sanity no tiene foto.
 const KIND_GRADIENT_CLASS = {
   news: "from-brand-blue to-brand-blue-deep",
   story: "from-brand-crimson to-brand-ink",
   report: "from-brand-ink to-brand-blue-deep",
 } as const;
 
-const WIDTHS: Record<Props["variant"], number[]> = {
+const isFeature = variant === "feature" || variant === "bento-feature";
+
+const WIDTHS: Record<Variant, number[]> = {
   feature: [480, 768, 1200, 1600],
+  "bento-feature": [768, 1200, 1600, 1920],
   side: [320, 480, 640],
+  "bento-side-top": [320, 480, 640, 768],
+  "bento-side-bottom": [320, 480, 640, 768],
+  "bento-bottom": [320, 480, 640, 768],
   grid: [320, 480, 640],
   compact: [240, 360, 480],
+  "more-news": [320, 480, 640, 768],
 };
-const SIZES: Record<Props["variant"], string> = {
+const SIZES: Record<Variant, string> = {
   feature: "(min-width: 1024px) 66vw, 100vw",
+  "bento-feature": "(min-width: 1024px) 66vw, 100vw",
   side: "(min-width: 1024px) 33vw, 100vw",
+  "bento-side-top": "(min-width: 1024px) 33vw, 100vw",
+  "bento-side-bottom": "(min-width: 1024px) 33vw, 100vw",
+  "bento-bottom": "(min-width: 1024px) 50vw, 100vw",
   grid: "(min-width: 1024px) 33vw, 50vw",
   compact: "(min-width: 1024px) 20vw, 33vw",
+  "more-news": "(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw",
 };
 
-const HEIGHT_CLASS: Record<Props["variant"], string> = {
+// Altura mobile-first fija; a partir de lg la card vive dentro de una grilla
+// con alto de fila explícito (ver NewsListPage.astro) y solo necesita
+// estirarse a esa celda — de ahí el h-full en vez de otro valor fijo.
+const HEIGHT_CLASS: Record<Variant, string> = {
   feature: "min-h-105 lg:min-h-120",
+  "bento-feature": "h-[400px] lg:h-full",
   side: "min-h-55",
+  "bento-side-top": "h-[290px] lg:h-full",
+  "bento-side-bottom": "h-[240px] lg:h-full",
+  "bento-bottom": "h-[240px] lg:h-full",
   grid: "min-h-70",
   compact: "min-h-45",
+  "more-news": "h-[240px]",
 };
+
+const TITLE_CLASS: Record<Variant, string> = {
+  feature: "text-[26px] lg:text-[36px] leading-[1.12]",
+  "bento-feature": "text-[26px] lg:text-[36px] leading-[1.12]",
+  side: "text-[21px] lg:text-[22px] leading-[1.18]",
+  "bento-side-top": "text-[24px] leading-[1.18]",
+  "bento-side-bottom": "text-[21px] lg:text-[22px] leading-[1.18]",
+  "bento-bottom": "text-[20px] lg:text-[21px] leading-[1.18]",
+  grid: "text-[20px] lg:text-[21px] leading-[1.18]",
+  compact: "text-[18px] leading-[1.18]",
+  "more-news": "text-[21px] lg:text-[22px] leading-[1.18]",
+};
+
+const PADDING_CLASS = isFeature ? "p-[22px] lg:p-8" : "p-[22px] lg:p-6";
+
+// Prioridad: la destacada siempre usa 40% (independientemente del tipo de
+// artículo que caiga ahí); el Report usa el tope de la foto para no cortar
+// el horizonte en fotos de inundación; el resto, 30% para no cortar caras.
+const objectPositionClass = isFeature
+  ? "object-[center_40%]"
+  : article.kind === "report"
+    ? "object-top"
+    : "object-[center_30%]";
 
 const builder = article.image ? urlForImage(article.image.raw) : null;
 const srcset = builder
   ? WIDTHS[variant].map((w) => `${builder.width(w).fit("crop").auto("format").url()} ${w}w`).join(", ")
   : null;
-const fallbackSrc = builder ? builder.width(WIDTHS[variant].at(-1)).fit("crop").auto("format").url() : null;
+const fallbackSrc = builder ? builder.width(WIDTHS[variant].at(-1)!).fit("crop").auto("format").url() : null;
+const imgAlt = article.image?.alt || article.title;
 ---
 
-<article class={`news-card news-card--${variant} group relative overflow-hidden rounded-3xl ${HEIGHT_CLASS[variant]}`}>
-  <div class="absolute inset-0" aria-hidden="true">
-    {
-      article.image && srcset && fallbackSrc ? (
-        <div
-          class="absolute inset-0 bg-cover bg-center"
-          style={article.image.lqip ? `background-image:url(${article.image.lqip})` : undefined}
-        >
-          <img
-            src={fallbackSrc}
-            srcset={srcset}
-            sizes={SIZES[variant]}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            class="h-full w-full object-cover"
-          />
-        </div>
-      ) : (
-        <div class={`absolute inset-0 bg-gradient-to-br ${KIND_GRADIENT_CLASS[article.kind]}`} />
-      )
-    }
-    <div class="absolute inset-0 photo-overlay-strong"></div>
-  </div>
+<article class={`group relative isolate overflow-hidden rounded-3xl bg-brand-ink ${HEIGHT_CLASS[variant]}`}>
+  {
+    article.image && srcset && fallbackSrc ? (
+      <img
+        src={fallbackSrc}
+        srcset={srcset}
+        sizes={SIZES[variant]}
+        alt={imgAlt}
+        loading={isFeature ? undefined : "lazy"}
+        decoding="async"
+        class={`absolute inset-0 h-full w-full object-cover ${objectPositionClass} saturate-[.88] motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-[1.04]`}
+      />
+    ) : (
+      <div class={`absolute inset-0 bg-gradient-to-br ${KIND_GRADIENT_CLASS[article.kind]}`} aria-hidden="true" />
+    )
+  }
 
-  <a
-    href={href}
-    aria-labelledby={titleId}
-    class="glass news-card-panel relative z-10 mt-auto flex flex-col gap-1.5 rounded-2xl p-4 sm:p-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
-  >
-    <div class="flex items-center gap-2">
-      <span class={`h-1.5 w-1.5 shrink-0 rounded-full ${KIND_DOT_CLASS[article.kind]}`} aria-hidden="true"></span>
-      <span class="text-xs font-bold uppercase tracking-widest text-white/80">{kindLabel}</span>
+  <div
+    class="absolute inset-0"
+    style="background:linear-gradient(180deg,rgba(9,14,38,0) 0%,rgba(9,14,38,0) 34%,rgba(9,14,38,0.72) 66%,rgba(9,14,38,0.96) 100%)"
+  />
+
+  <div class={`absolute inset-x-0 bottom-0 flex flex-col gap-2.5 ${PADDING_CLASS}`}>
+    <div class="flex flex-wrap items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.1em] text-white/90">
+      <span class={`h-[7px] w-[7px] shrink-0 rounded-full ${KIND_DOT_CLASS[article.kind]}`} aria-hidden="true" />
+      <span>{kindLabel}</span>
+      <span class="font-normal normal-case tracking-normal text-white/72">
+        · {dateFormatter.format(new Date(article.publishedAt))}
+      </span>
       {
         article.isFallback && (
-          <span class="ml-auto rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/70">
-            {t("news.fallbackBadge")}
-          </span>
+          <span class="font-normal normal-case tracking-normal text-white/72">· {t("news.fallbackBadge")}</span>
         )
       }
     </div>
 
-    <h3 id={titleId} class="news-card-title font-display font-extrabold leading-tight text-white">
+    <h3
+      id={titleId}
+      class={`font-display text-white line-clamp-3 [text-shadow:0_1px_2px_rgba(0,0,0,0.25)] ${TITLE_CLASS[variant]}`}
+    >
       {article.title}
     </h3>
 
-    <time class="font-serif text-sm italic text-white/60" datetime={article.publishedAt}>
-      {dateFormatter.format(new Date(article.publishedAt))}
-    </time>
-
-    <div class="news-excerpt-wrap">
-      <p class="pt-1 text-sm leading-relaxed text-white/75">{article.excerpt}</p>
-    </div>
-
     {
-      article.kind === "report" && (
-        <span class="mt-1 inline-flex w-fit items-center gap-1.5 rounded-full bg-brand-yellow px-3 py-1 text-xs font-bold text-brand-ink">
-          {t("news.downloadReport")}
-        </span>
+      isFeature && (
+        <p class="line-clamp-2 text-[15px] leading-normal text-white/85 lg:text-[16px]">{article.excerpt}</p>
       )
     }
+  </div>
+
+  <a
+    href={href}
+    class="after:absolute after:inset-0 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-brand-blue"
+  >
+    <span class="sr-only">{article.title}</span>
   </a>
 </article>
-
-<style>
-  .news-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-  }
-  .news-card-panel {
-    margin: 0.75rem;
-  }
-  .news-card-title {
-    font-size: 1.05rem;
-  }
-  .news-card--feature .news-card-title {
-    font-size: 1.6rem;
-  }
-  .news-card--side .news-card-title {
-    font-size: 1.15rem;
-  }
-  .news-card--compact .news-card-title {
-    font-size: 0.95rem;
-  }
-
-  .news-excerpt-wrap {
-    display: grid;
-    grid-template-rows: 0fr;
-    overflow: hidden;
-    transition: grid-template-rows 0.35s ease;
-  }
-  .news-excerpt-wrap > p {
-    min-height: 0;
-    overflow: hidden;
-  }
-  .news-card:hover .news-excerpt-wrap,
-  .news-card:focus-within .news-excerpt-wrap {
-    grid-template-rows: 1fr;
-  }
-  .news-card--feature .news-excerpt-wrap {
-    grid-template-rows: 1fr;
-  }
-  .news-card--compact .news-excerpt-wrap {
-    display: none;
-  }
-
-  @media (max-width: 1023px) {
-    .news-excerpt-wrap {
-      grid-template-rows: 1fr;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .news-excerpt-wrap {
-      transition: none;
-    }
-  }
-</style>
