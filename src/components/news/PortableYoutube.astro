@@ -1,0 +1,29 @@
+---
+// Siempre renderiza contra youtube-nocookie.com sin importar qué forma de
+// enlace haya pegado el editor en Sanity (youtu.be, watch?v=, embed/, shorts/)
+// — así la CSP (frame-src) se cumple sin depender del dato editorial.
+const { node } = Astro.props;
+
+function extractId(url: string | undefined): string | null {
+  if (!url) return null;
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+  return match ? match[1] : null;
+}
+
+const id = extractId(node?.url);
+---
+
+{
+  id && (
+    <div class="my-6 aspect-video overflow-hidden rounded-2xl">
+      <iframe
+        src={`https://www.youtube-nocookie.com/embed/${id}`}
+        title="YouTube video"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        class="h-full w-full"
+      />
+    </div>
+  )
+}

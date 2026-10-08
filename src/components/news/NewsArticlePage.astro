@@ -1,0 +1,195 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../Header.astro";
+import Footer from "../Footer.astro";
+import NewsCard from "./NewsCard.astro";
+import { PortableText } from "astro-portabletext";
+import PortableImage from "./PortableImage.astro";
+import PortableYoutube from "./PortableYoutube.astro";
+import { urlForImage } from "../../lib/sanity";
+import { getLatest, type NewsArticle } from "../../lib/news";
+import { getLangFromUrl, useTranslations, useTranslatedPath, type Lang } from "../../i18n/utils";
+
+interface Props {
+  article: NewsArticle;
+}
+
+const { article } = Astro.props;
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+const dateFormatter = new Intl.DateTimeFormat(lang === "es" ? "es" : "en-US", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const KIND_LABEL_KEY = {
+  news: "news.chipNews",
+  story: "news.chipStory",
+  report: "news.chipReport",
+} as const;
+
+const heroImage = article.image ? urlForImage(article.image.raw)?.width(1600).fit("max").auto("format").url() : null;
+
+const moreNews = (await getLatest(lang, 4)).filter((a) => a.id !== article.id).slice(0, 3);
+
+const layoutAlternates = (Object.entries(article.alternates) as [Lang, string][]).map(([code, slug]) => ({
+  code,
+  href: new URL(`${translatePath("news", code)}/${slug}`, Astro.site),
+}));
+
+const canonicalHref = layoutAlternates.find((a) => a.code === lang)?.href ?? null;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  headline: article.title,
+  description: article.excerpt,
+  datePublished: article.publishedAt,
+  ...(heroImage ? { image: [heroImage] } : {}),
+  author: { "@type": "Organization", name: "Venezuela NOW" },
+  publisher: { "@type": "Organization", name: "Venezuela NOW" },
+  ...(canonicalHref ? { mainEntityOfPage: canonicalHref.toString() } : {}),
+};
+---
+
+<Layout title={article.title} description={article.excerpt} image={heroImage ?? undefined} alternates={layoutAlternates}>
+  <Header />
+  <main id="main-content" class="pt-32 pb-24">
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="mb-6 flex items-center gap-2 text-sm text-slate-500 reveal" aria-label={t("news.breadcrumbNews")}>
+        <a href={translatePath("home")} class="hover:text-brand-blue transition-colors">{t("news.breadcrumbHome")}</a>
+        <span aria-hidden="true">/</span>
+        <a href={translatePath("news")} class="hover:text-brand-blue transition-colors">{t("news.breadcrumbNews")}</a>
+      </nav>
+
+      <header class="mb-8 reveal">
+        <span class="inline-block bg-brand-crimson text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">
+          {t(KIND_LABEL_KEY[article.kind])}
+        </span>
+        <h1 class="font-display text-3xl sm:text-5xl font-black text-brand-ink leading-tight mb-4">
+          {article.title}
+        </h1>
+        <time class="font-serif italic text-slate-500" datetime={article.publishedAt}>
+          {dateFormatter.format(new Date(article.publishedAt))}
+        </time>
+
+        {
+          article.isFallback && (
+            <p class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              {t("news.fallbackNotice")}
+            </p>
+          )
+        }
+      </header>
+
+      {
+        heroImage && (
+          <img
+            src={heroImage}
+            alt={article.image?.alt ?? ""}
+            class="mb-10 w-full rounded-3xl object-cover reveal"
+            loading="eager"
+          />
+        )
+      }
+
+      {
+        article.kind === "report" && article.attachmentUrl && (
+          <a
+            href={article.attachmentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mb-10 flex items-center gap-3 rounded-2xl bg-brand-yellow px-6 py-4 font-bold text-brand-ink hover:brightness-105 transition reveal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-ink w-fit"
+          >
+            {t("news.downloadReport")}
+          </a>
+        )
+      }
+
+      <div class="article-body reveal">
+        <PortableText
+          value={article.body as any}
+          components={{
+            type: {
+              image: PortableImage,
+              youtubeEmbed: PortableYoutube,
+            },
+          }}
+        />
+      </div>
+    </article>
+
+    {
+      moreNews.length > 0 && (
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 reveal" aria-labelledby="more-news-heading">
+          <h2 id="more-news-heading" class="font-display text-2xl sm:text-3xl font-black text-brand-ink mb-6">
+            {t("news.moreNews")}
+          </h2>
+          <div class="grid gap-5 sm:grid-cols-3">
+            {moreNews.map((item) => (
+              <NewsCard article={item} variant="compact" />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .article-body {
+    max-width: 38rem;
+    margin-inline: auto;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: #374151;
+  }
+  .article-body :global(h2) {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--color-brand-ink);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+  .article-body :global(h3) {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--color-brand-ink);
+    margin-top: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .article-body :global(p) {
+    margin-bottom: 1.25rem;
+  }
+  .article-body :global(a) {
+    color: var(--color-brand-blue);
+    text-decoration: underline;
+  }
+  .article-body :global(blockquote) {
+    border-left: 3px solid var(--color-brand-yellow);
+    padding-left: 1.25rem;
+    font-style: italic;
+    color: #4a5568;
+    margin: 1.5rem 0;
+  }
+  .article-body :global(ul),
+  .article-body :global(ol) {
+    margin: 1rem 0 1.25rem 1.5rem;
+  }
+  .article-body :global(ul) {
+    list-style-type: disc;
+  }
+  .article-body :global(ol) {
+    list-style-type: decimal;
+  }
+</style>

@@ -11,6 +11,7 @@
   --color-brand-yellow: #FEED23;
   --color-brand-crimson:#FE0036;
   --color-surface:      #F6F7F9;
+  --color-surface-cool: #F2F3F8;
 
   /* Variante atenuada de brand-blue para usar en fondos de sección grandes —
      brand-blue puro queda reservado para acentos/CTAs (ver PASO 1 del brief). */

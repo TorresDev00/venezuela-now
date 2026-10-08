@@ -1,0 +1,9 @@
+---
+import { urlForImage } from "../../lib/sanity";
+
+const { node } = Astro.props;
+const builder = urlForImage(node);
+const src = builder?.width(1400).fit("max").auto("format").url() ?? null;
+---
+
+{src && <img src={src} alt="" loading="lazy" class="my-6 w-full rounded-2xl" />}

@@ -2,7 +2,8 @@
 import Layout             from '../layouts/Layout.astro';
 import Header             from './Header.astro';
 import Hero               from './Hero.astro';
-import StoryGrid          from './StoryGrid.astro';
+// import StoryGrid       from './StoryGrid.astro'; // reemplazado por NewsSection (Sanity) — ver src/components/NewsSection.astro
+import NewsSection        from './NewsSection.astro';
 import AboutImpact        from './Aboutimpact.astro';
 import ResponseCards      from './ResponseCards.astro';
 // import OrganizationsGrid  from './OrganizationsGrid.astro'; // grid estático — conservado como alternativa, ver MinistriesShowcase
@@ -168,7 +169,15 @@ const seismographPath =
     <AboutImpact />
     {/* <OrganizationsGrid /> — versión grid estática, conservada como alternativa */}
     <MinistriesShowcase />
-    <StoryGrid />
+
+    <NewsSection server:defer>
+      <div slot="fallback" class="py-16" style="background-color: var(--color-surface-cool)" aria-hidden="true">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="h-185 animate-pulse rounded-3xl bg-slate-200/70"></div>
+        </div>
+      </div>
+    </NewsSection>
+
     <CtaBand />
   </main>
 

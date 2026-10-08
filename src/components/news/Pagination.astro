@@ -1,0 +1,55 @@
+---
+import { getLangFromUrl, useTranslations, useTranslatedPath } from "../../i18n/utils";
+
+interface Props {
+  page: number;
+  totalPages: number;
+  type?: string;
+}
+
+const { page, totalPages, type } = Astro.props;
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+function pageHref(p: number) {
+  const params = new URLSearchParams();
+  if (type) params.set("type", type);
+  if (p > 1) params.set("page", String(p));
+  const qs = params.toString();
+  return `${translatePath("news")}${qs ? `?${qs}` : ""}`;
+}
+---
+
+{
+  totalPages > 1 && (
+    <nav class="flex items-center justify-center gap-2" aria-label={t("news.paginationAria")}>
+      <a
+        href={pageHref(Math.max(1, page - 1))}
+        aria-disabled={page <= 1}
+        class={`rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow ${
+          page <= 1 ? "pointer-events-none opacity-40" : "text-brand-ink hover:border-brand-blue hover:text-brand-blue"
+        }`}
+      >
+        {t("news.paginationPrev")}
+      </a>
+
+      <span class="px-3 text-sm font-medium text-slate-500" aria-current="page">
+        {t("news.pageLabel")} {page} / {totalPages}
+      </span>
+
+      <a
+        href={pageHref(Math.min(totalPages, page + 1))}
+        aria-disabled={page >= totalPages}
+        class={`rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow ${
+          page >= totalPages
+            ? "pointer-events-none opacity-40"
+            : "text-brand-ink hover:border-brand-blue hover:text-brand-blue"
+        }`}
+      >
+        {t("news.paginationNext")}
+      </a>
+    </nav>
+  )
+}
