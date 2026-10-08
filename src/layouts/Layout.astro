@@ -7,6 +7,15 @@ import { getLangFromUrl, getRouteKeyFromUrl, useTranslations, useTranslatedPath 
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
+  /**
+   * Override de los hreflang alternos. Las páginas estáticas los derivan
+   * solas del mapa de rutas (routes/ui.ts), pero un artículo de noticias
+   * tiene un slug distinto por idioma que no vive en ese mapa — las rutas
+   * de noticias calculan sus propios alternates (ver src/lib/news.ts) y los
+   * pasan aquí.
+   */
+  alternates?: { code: string; href: string | URL }[];
 }
 
 const lang = getLangFromUrl(Astro.url);
@@ -17,16 +26,21 @@ const translatePath = useTranslatedPath(lang);
 const {
   title = t('meta.title'),
   description = t('meta.description'),
+  image,
+  alternates: alternatesProp,
 } = Astro.props;
 
 // hreflang alternos: uno por idioma soportado + x-default apuntando al inglés
 // (idioma primario). Requiere `site` configurado en astro.config.mjs.
-const alternates = (Object.keys(languages) as (keyof typeof languages)[]).map((code) => ({
-  code,
-  href: new URL(translatePath(routeKey, code), Astro.site),
-}));
-const canonicalUrl = new URL(translatePath(routeKey, lang), Astro.site);
-const defaultUrl = new URL(translatePath(routeKey, defaultLang), Astro.site);
+const alternates =
+  alternatesProp ??
+  (Object.keys(languages) as (keyof typeof languages)[]).map((code) => ({
+    code,
+    href: new URL(translatePath(routeKey, code), Astro.site),
+  }));
+const canonicalUrl = alternates.find((a) => a.code === lang)?.href ?? new URL(translatePath(routeKey, lang), Astro.site);
+const defaultUrl = alternates.find((a) => a.code === defaultLang)?.href ?? new URL(translatePath(routeKey, defaultLang), Astro.site);
+const ogImage = image ? new URL(image, Astro.site) : null;
 ---
 
 <html lang={lang}>
@@ -37,6 +51,13 @@ const defaultUrl = new URL(translatePath(routeKey, defaultLang), Astro.site);
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0A0A23" />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
 
     <link rel="canonical" href={canonicalUrl} />
     {alternates.map(({ code, href }) => (

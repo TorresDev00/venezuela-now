@@ -1,0 +1,15 @@
+---
+export const prerender = false;
+
+import NewsArticlePage from "../../components/news/NewsArticlePage.astro";
+import { getBySlug } from "../../lib/news";
+
+const { slug } = Astro.params;
+const article = slug ? await getBySlug("en", slug) : null;
+
+if (!article) {
+  return new Response(null, { status: 404, statusText: "Not Found" });
+}
+---
+
+<NewsArticlePage article={article} />

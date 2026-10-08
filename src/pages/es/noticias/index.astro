@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+
+import { z } from "zod";
+import NewsListPage from "../../../components/news/NewsListPage.astro";
+
+const typeResult = z.enum(["news", "story", "report"]).safeParse(Astro.url.searchParams.get("type") ?? undefined);
+const pageResult = z.coerce.number().int().min(1).safeParse(Astro.url.searchParams.get("page") ?? "1");
+
+const type = typeResult.success ? typeResult.data : undefined;
+const page = pageResult.success ? pageResult.data : 1;
+---
+
+<NewsListPage type={type} page={page} />

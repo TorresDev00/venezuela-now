@@ -3,11 +3,17 @@
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import cloudflare from '@astrojs/cloudflare';
 import { SITE_URL } from './src/consts.ts';
 
 // https://astro.build/config
 export default defineConfig({
 	site: SITE_URL,
+	// Requerido por las rutas de noticias (prerender = false) y por el
+	// Server Island de NewsSection en el home — el resto del sitio sigue
+	// prerenderizado estático por defecto. Ver docs del adaptador:
+	// https://docs.astro.build/en/guides/integrations-guide/cloudflare/
+	adapter: cloudflare(),
 	i18n: {
 		defaultLocale: 'en',
 		locales: ['en', 'es'],
