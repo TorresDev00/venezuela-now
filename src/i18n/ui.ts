@@ -144,7 +144,7 @@ export const ui = {
     "news.skeletonLabel": "Loading news…",
   },
   es: {
-    "meta.title": "Venezuela NOW — Ayuda a los sobrevivientes del terremoto",
+    "meta.title": "Venezuela NOW",
     "meta.description":
       "Venezuela NOW, Inc. es una organización sin fines de lucro 501(c)(3) dedicada a apoyar a los sobrevivientes de los terremotos en Venezuela con alimentos, refugio y atención médica.",
 
